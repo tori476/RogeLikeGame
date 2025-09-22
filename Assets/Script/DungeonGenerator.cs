@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.AI;
+using Unity.AI.Navigation;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -27,8 +29,11 @@ public class DungeonManager : MonoBehaviour
     // 使用済みコネクターの位置を記録するリスト（壁生成で除外するため）
     private HashSet<Vector3> usedConnectorPositions = new HashSet<Vector3>();
 
+    private NavMeshSurface navMeshSurface; // NavMeshSurfaceへの参照を追加
+
     void Start()
     {
+        navMeshSurface = GetComponent<NavMeshSurface>();
         GenerateDungeon();
     }
 
@@ -73,6 +78,8 @@ public class DungeonManager : MonoBehaviour
         }
 
         CloseOpenConnectors();
+        // 全ての配置が終わった後にNavMeshを構築する
+        navMeshSurface.BuildNavMesh();
     }
 
     // 部屋の配置を試行するメソッド
