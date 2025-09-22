@@ -78,8 +78,8 @@ public class DungeonManager : MonoBehaviour
         }
 
         CloseOpenConnectors();
-        // 全ての配置が終わった後にNavMeshを構築する
-        navMeshSurface.BuildNavMesh();
+        // フレーム遅延を入れてからNavMeshを構築
+        StartCoroutine(BuildNavMeshDelayed());
     }
 
     // 部屋の配置を試行するメソッド
@@ -294,5 +294,12 @@ public class DungeonManager : MonoBehaviour
             }
         }
         Debug.Log($"生成された壁の数: {wallCount}");
+    }
+
+    private System.Collections.IEnumerator BuildNavMeshDelayed()
+    {
+        // 1フレーム待機して、すべてのオブジェクトが確実に配置されるのを待つ
+        yield return null;
+        navMeshSurface.BuildNavMesh();
     }
 }
