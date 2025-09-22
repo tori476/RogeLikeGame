@@ -742,7 +742,7 @@ MonoBehaviour:
   dashSpeed: 15
   gravity: -9.81
   tapAttackThreshold: 0.3
-  attackCooldown: 0.5
+  attackCooldown: 0.6
   normalAttackDuration: 0.4
   minChargeForce: 8
   maxChargeForce: 20
