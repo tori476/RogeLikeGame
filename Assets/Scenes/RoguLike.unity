@@ -743,7 +743,7 @@ MonoBehaviour:
   gravity: -9.81
   tapAttackThreshold: 0.3
   attackCooldown: 0.6
-  normalAttackDuration: 0.4
+  normalAttackDuration: 0.5
   minChargeForce: 8
   maxChargeForce: 20
   maxChargeDuration: 2

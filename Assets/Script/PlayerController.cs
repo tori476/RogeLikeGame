@@ -92,8 +92,8 @@ public class PlayerController : MonoBehaviour
 
             float holdDuration = Time.time - chargeStartTime;
 
-            canAttack = false;
-            StartCoroutine(ResetAttackCooldown()); //クールダウン
+            //canAttack = false;
+            //StartCoroutine(ResetAttackCooldown()); //クールダウン
 
 
             // ■ 短いタップか、長いホールドかを判定
