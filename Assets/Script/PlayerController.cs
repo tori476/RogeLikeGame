@@ -27,6 +27,14 @@ public class PlayerController : MonoBehaviour
 
     public float chargeAttackDuration = 1.0f; //アニメーション再生時間
 
+    [Header("武器設定")]
+    [SerializeField]
+    private Collider weaponCollider;
+
+    // 武器のダメージ処理スクリプトへの参照
+    private WeaponDamageDealer weaponDamageDealer;
+
+
     private bool isDashing = false;
     private bool isCharging = false;
     private float chargeStartTime;
@@ -43,6 +51,10 @@ public class PlayerController : MonoBehaviour
     {
         controller = GetComponent<CharacterController>();
         anim = GetComponent<Animator>();
+        if (weaponCollider != null)
+        {
+            weaponDamageDealer = weaponCollider.GetComponent<WeaponDamageDealer>();
+        }
     }
 
     // Player Inputコンポーネントが "Move" アクションを検出したときに呼び出される
@@ -113,6 +125,12 @@ public class PlayerController : MonoBehaviour
                 // 溜め時間の割合（0.0～1.0）を計算
                 float chargeRatio = chargeDuration / maxChargeDuration;
 
+                int chargeDamage = (int)(25 * (1.0f + chargeRatio)); // 1は基本ダメージ。WeaponDamageDealerの基本値と合わせる
+                if (weaponDamageDealer != null)
+                {
+                    weaponDamageDealer.SetDamage(chargeDamage);
+                }
+
                 // 割合に応じて、最小と最大の間で飛び出す力を決定
                 float force = Mathf.Lerp(minChargeForce, maxChargeForce, chargeRatio);
 
@@ -120,6 +138,36 @@ public class PlayerController : MonoBehaviour
                 anim.SetTrigger("ChargeAttack");
                 StartCoroutine(LockMovementForDuration(chargeAttackDuration));
             }
+        }
+    }
+
+    public void StartAttack()
+    {
+        if (weaponCollider != null)
+        {
+            // 武器のColliderを有効化
+            weaponCollider.enabled = true;
+
+            // ヒット済みリストをリセットする
+            if (weaponDamageDealer != null)
+            {
+                weaponDamageDealer.StartDealDamage();
+            }
+        }
+    }
+
+    public void EndAttack()
+    {
+        if (weaponCollider != null)
+        {
+            // 武器のColliderを無効化
+            weaponCollider.enabled = false;
+        }
+
+        // 念のため、通常攻撃のダメージ量に戻しておく
+        if (weaponDamageDealer != null)
+        {
+            weaponDamageDealer.SetDamage(25); // 25は基本ダメージ
         }
     }
     private IEnumerator ResetAttackCooldown()
