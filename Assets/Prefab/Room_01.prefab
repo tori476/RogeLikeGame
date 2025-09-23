@@ -1397,7 +1397,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a5e13bb6230249a986eca01d6c72787, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAI
-  health: 100
+  health: 50
+  knockbackForce: 10
+  knockbackDuration: 0.4
 --- !u!195 &1529846605195419839
 NavMeshAgent:
   m_ObjectHideFlags: 0

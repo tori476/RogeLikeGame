@@ -54,6 +54,10 @@ public class PlayerController : MonoBehaviour
         if (weaponCollider != null)
         {
             weaponDamageDealer = weaponCollider.GetComponent<WeaponDamageDealer>();
+            if (weaponDamageDealer != null)
+            {
+                weaponDamageDealer.Initialize(this.transform);
+            }
         }
     }
 
