@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.AI; // NavMeshAgentを使うために必要
 using System.Collections;
+using System;
 
 public class EnemyAI : MonoBehaviour
 {
@@ -14,6 +15,10 @@ public class EnemyAI : MonoBehaviour
     private NavMeshAgent agent;
     private Transform player;
 
+    private bool isActivated = false;
+
+    public event Action<EnemyAI> OnEnemyDied;
+
     void Start()
     {
         // 自分にアタッチされているNavMeshAgentを取得
@@ -25,15 +30,35 @@ public class EnemyAI : MonoBehaviour
         {
             player = playerObject.transform;
         }
+
+        if (agent != null)
+        {
+            agent.enabled = false;
+        }
     }
 
     void Update()
     {
-        // プレイヤーが見つかっていれば、その位置を目的地に設定し続ける
-        if (player != null && agent.isActiveAndEnabled && agent.isOnNavMesh && knockbackCoroutine == null)
+        if (!isActivated || player == null || !agent.isActiveAndEnabled || !agent.isOnNavMesh || knockbackCoroutine != null)
         {
-            agent.SetDestination(player.position);
+            return;
         }
+        // プレイヤーが見つかっていれば、その位置を目的地に設定し続ける
+        agent.SetDestination(player.position);
+    }
+
+    public void ActivateEnemy()
+    {
+        // 既に起動済みなら何もしない
+        if (isActivated) return;
+
+        isActivated = true;
+        // 起動したらNavMeshAgentを有効にして、追跡を開始できるようにする
+        if (agent != null)
+        {
+            agent.enabled = true;
+        }
+        Debug.Log(this.gameObject.name + " が起動しました！");
     }
 
     public void TakeDamage(int damage, Transform attacker)
@@ -80,6 +105,7 @@ public class EnemyAI : MonoBehaviour
     private void Die()
     {
         Debug.Log(gameObject.name + " は倒された！");
+        OnEnemyDied?.Invoke(this);
         // このゲームオブジェクトをシーンから削除する
         Destroy(gameObject);
     }
