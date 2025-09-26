@@ -602,7 +602,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 30, y: 4, z: 30}
+  m_Size: {x: 29, y: 4, z: 29}
   m_Center: {x: 0, y: 2, z: 0}
 --- !u!114 &2667413500821229642
 MonoBehaviour:
@@ -616,6 +616,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d86774a168c1b464293cf8e6a9bddc2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoomController
+  doorPrefab: {fileID: 1211182161564370512, guid: 749aba12397144121bf3c0ce307d3625, type: 3}
   roomLights:
   - {fileID: 8231425274570020902}
 --- !u!1 &7109503406321974359
