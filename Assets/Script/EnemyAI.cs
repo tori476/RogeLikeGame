@@ -11,15 +11,15 @@ public class EnemyAI : MonoBehaviour
     [Header("エフェクト設定")]
     public float knockbackForce = 10f;    // ノックバックの強さ
     public float knockbackDuration = 0.4f; // ノックバックする時間
-    private Coroutine knockbackCoroutine;
-    private NavMeshAgent agent;
-    private Transform player;
+    protected Coroutine knockbackCoroutine;
+    protected NavMeshAgent agent;
+    protected Transform player;
 
-    private bool isActivated = false;
+    protected bool isActivated = false;
 
     public event Action<EnemyAI> OnEnemyDied;
 
-    void Start()
+    protected virtual void Start()
     {
         // 自分にアタッチされているNavMeshAgentを取得
         agent = GetComponent<NavMeshAgent>();
@@ -37,7 +37,7 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
-    void Update()
+    protected virtual void Update()
     {
         if (!isActivated || player == null || !agent.isActiveAndEnabled || !agent.isOnNavMesh || knockbackCoroutine != null)
         {
