@@ -1340,6 +1340,14 @@ MonoBehaviour:
   attackRange: 3
   attackCooldown: 2
   attackDamage: 1
+  chargeAttackRange: 15
+  chargePreparationTime: 1.5
+  chargeSpeed: 20
+  chargeDamage: 40
+  chargeAttackCooldown: 5
+  chargeAttackProbability: 0.1
+  chargeIndicatorPrefab: {fileID: 5594279115082187016, guid: 5443f907905a044139c1e1d0dea75bd4, type: 3}
+  chargeImpactRadius: 2.5
 --- !u!195 &6666112546472339561
 NavMeshAgent:
   m_ObjectHideFlags: 0
