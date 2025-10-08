@@ -8,6 +8,12 @@ public class EnemyAI : MonoBehaviour
     [Header("ステータス")]
     public int health = 100;
 
+    [Header("攻撃設定")]
+    public float attackRange = 2.0f;    // 攻撃を開始するプレイヤーとの距離
+    public float attackCooldown = 1.5f; // 攻撃後の待ち時間（秒）
+    public int attackDamage = 1;        // 敵の攻撃力を1に固定
+    private float lastAttackTime = 0f;  // 最後に攻撃した時間
+
     [Header("エフェクト設定")]
     public float knockbackForce = 10f;    // ノックバックの強さ
     public float knockbackDuration = 0.4f; // ノックバックする時間
@@ -35,6 +41,10 @@ public class EnemyAI : MonoBehaviour
         {
             agent.enabled = false;
         }
+
+        // 念のため、攻撃力を1に強制設定
+        attackDamage = 1;
+        Debug.Log($"{gameObject.name} の攻撃力を {attackDamage} に設定しました");
     }
 
     protected virtual void Update()
@@ -43,8 +53,36 @@ public class EnemyAI : MonoBehaviour
         {
             return;
         }
-        // プレイヤーが見つかっていれば、その位置を目的地に設定し続ける
-        agent.SetDestination(player.position);
+
+        // プレイヤーとの距離を計算
+        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+
+        // 攻撃範囲内にいて、クールダウンが終わっていれば攻撃
+        if (distanceToPlayer <= attackRange && Time.time >= lastAttackTime + attackCooldown)
+        {
+            AttackPlayer();
+            lastAttackTime = Time.time;
+            agent.isStopped = true; // 攻撃中は停止
+        }
+        else if (distanceToPlayer > attackRange)
+        {
+            // プレイヤーが見つかっていれば、その位置を目的地に設定し続ける
+            agent.isStopped = false;
+            agent.SetDestination(player.position);
+        }
+    }
+
+    // プレイヤーを攻撃するメソッド
+    private void AttackPlayer()
+    {
+        Debug.Log($"{gameObject.name} がプレイヤーを攻撃！攻撃力: {attackDamage}");
+
+        PlayerHP playerHP = player.GetComponent<PlayerHP>();
+        if (playerHP != null)
+        {
+            playerHP.TakeDamage(attackDamage);
+            Debug.Log($"{gameObject.name} がプレイヤーに {attackDamage} のダメージを与えた！");
+        }
     }
 
     public void ActivateEnemy()
@@ -71,13 +109,13 @@ public class EnemyAI : MonoBehaviour
             knockbackCoroutine = StartCoroutine(Knockback(attacker));
         }
 
-
         // 体力が0以下になったら
         if (health <= 0)
         {
             Die();
         }
     }
+
     private IEnumerator Knockback(Transform attacker)
     {
         // AIの移動を一時的に停止
