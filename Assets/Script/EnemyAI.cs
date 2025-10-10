@@ -3,6 +3,7 @@ using UnityEngine.AI; // NavMeshAgentを使うために必要
 using System.Collections;
 using System;
 
+[RequireComponent(typeof(Rigidbody))]
 public class EnemyAI : MonoBehaviour
 {
     [Header("ステータス")]
@@ -21,14 +22,19 @@ public class EnemyAI : MonoBehaviour
     protected NavMeshAgent agent;
     protected Transform player;
 
+    protected Rigidbody rb;
+
     protected bool isActivated = false;
 
     public event Action<EnemyAI> OnEnemyDied;
+
+    public event Action<int> OnHealthChanged;
 
     protected virtual void Start()
     {
         // 自分にアタッチされているNavMeshAgentを取得
         agent = GetComponent<NavMeshAgent>();
+        rb = GetComponent<Rigidbody>();
 
         // "Player" タグがついたオブジェクト（プレイヤー）を探して、そのTransformを取得
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
@@ -85,7 +91,7 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
-    public void ActivateEnemy()
+    public virtual void ActivateEnemy()
     {
         // 既に起動済みなら何もしない
         if (isActivated) return;
@@ -99,10 +105,11 @@ public class EnemyAI : MonoBehaviour
         Debug.Log(this.gameObject.name + " が起動しました！");
     }
 
-    public void TakeDamage(int damage, Transform attacker)
+    public virtual void TakeDamage(int damage, Transform attacker)
     {
         // 体力を減らす
         health -= damage;
+        OnHealthChanged?.Invoke(health);
         Debug.Log(gameObject.name + " の残り体力: " + health);
         if (knockbackCoroutine == null)
         {
@@ -116,26 +123,39 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
-    private IEnumerator Knockback(Transform attacker)
+    protected IEnumerator Knockback(Transform attacker)
     {
         // AIの移動を一時的に停止
-        agent.enabled = false;
+        if (agent.isActiveAndEnabled)
+        {
+            agent.isStopped = true;
+            agent.enabled = false;
+        }
+
+        // Rigidbodyを物理演算の対象にする
+        rb.isKinematic = false;
 
         // 攻撃者から自分への方向ベクトルを計算（吹き飛ぶ方向）
         Vector3 direction = (transform.position - attacker.position).normalized;
         direction.y = 0; // 上下には吹き飛ばないようにする
 
-        float elapsedTime = 0f;
-        while (elapsedTime < knockbackDuration)
-        {
-            // 計算した方向へ、力を加えながら後退させる
-            transform.position += direction * knockbackForce * Time.deltaTime;
-            elapsedTime += Time.deltaTime;
-            yield return null; // 1フレーム待機
-        }
+        // 既存の速度をリセットしてから力を加える
+        rb.linearVelocity = Vector3.zero;
+        rb.AddForce(direction * knockbackForce, ForceMode.Impulse);
 
+
+        // ノックバック時間待機
+        yield return new WaitForSeconds(knockbackDuration);
+
+        // Rigidbodyの物理演算を停止し、速度をゼロにする
+        rb.linearVelocity = Vector3.zero;
+        rb.isKinematic = true;
         // AIの移動を再開
         agent.enabled = true;
+        if (agent.isOnNavMesh)
+        {
+            agent.isStopped = false;
+        }
         knockbackCoroutine = null; // コルーチンが終了したことを示す
     }
 
