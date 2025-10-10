@@ -32,10 +32,14 @@ public class BossAI : EnemyAI
     private BossState currentState; // 現在の状態を保持する変数
     private Animator anim; // アニメーションを制御するため
 
+    public event Action<int> OnHealthChanged; // ボス専用のHP変更イベント
     public event Action<BossAI> OnBossDied;
 
     private Vector3 chargeTargetPosition;       // 突進の目標地点
     private GameObject currentChargeIndicator;  // 生成したインジケーターを保持する変数
+
+
+
 
 
     protected override void Start()
@@ -240,7 +244,7 @@ public class BossAI : EnemyAI
     }
 
 
-    public void ActivateEnemy()
+    public override void ActivateEnemy()
     {
         // 既に起動済みなら何もしない
         if (isActivated) return;
@@ -252,12 +256,26 @@ public class BossAI : EnemyAI
             agent.enabled = true;
         }
         Debug.Log(this.gameObject.name + " が起動しました！");
+
+        BossUIController uiController = FindFirstObjectByType<BossUIController>();
+
+        // 見つかった場合のみ、UIのセットアップを依頼する
+        if (uiController != null)
+        {
+            uiController.SetupBossUI(this);
+        }
+        else
+        {
+            // 見つからなかった場合は、念のためログに警告を表示する
+            Debug.LogWarning("シーン内に BossUIController が見つかりませんでした。");
+        }
     }
 
-    public void TakeDamage(int damage, Transform attacker)
+    public override void TakeDamage(int damage, Transform attacker)
     {
         // 体力を減らす
         health -= damage;
+        OnHealthChanged?.Invoke(health);
         Debug.Log(gameObject.name + " の残り体力: " + health);
         if (knockbackCoroutine == null)
         {
@@ -271,28 +289,7 @@ public class BossAI : EnemyAI
             Die();
         }
     }
-    private IEnumerator Knockback(Transform attacker)
-    {
-        // AIの移動を一時的に停止
-        agent.enabled = false;
 
-        // 攻撃者から自分への方向ベクトルを計算（吹き飛ぶ方向）
-        Vector3 direction = (transform.position - attacker.position).normalized;
-        direction.y = 0; // 上下には吹き飛ばないようにする
-
-        float elapsedTime = 0f;
-        while (elapsedTime < knockbackDuration)
-        {
-            // 計算した方向へ、力を加えながら後退させる
-            transform.position += direction * knockbackForce * Time.deltaTime;
-            elapsedTime += Time.deltaTime;
-            yield return null; // 1フレーム待機
-        }
-
-        // AIの移動を再開
-        agent.enabled = true;
-        knockbackCoroutine = null; // コルーチンが終了したことを示す
-    }
 
 
     // 死亡時の処理を行うメソッド
