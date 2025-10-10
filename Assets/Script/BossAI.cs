@@ -57,7 +57,7 @@ public class BossAI : EnemyAI
         }
 
         // 突進中以外は常にプレイヤーの方向を向く
-        if (currentState != BossState.Charging)
+        if (currentState == BossState.Chasing)
         {
             LookAtPlayer();
         }
@@ -302,5 +302,14 @@ public class BossAI : EnemyAI
         OnBossDied?.Invoke(this);
         // このゲームオブジェクトをシーンから削除する
         Destroy(gameObject);
+    }
+    private void OnDestroy()
+    {
+        // もしインジケーター（突進の目印）が生成されていて、まだシーンに残っている場合に
+        if (currentChargeIndicator != null)
+        {
+            // インジケーターも一緒に破棄する
+            Destroy(currentChargeIndicator);
+        }
     }
 }
