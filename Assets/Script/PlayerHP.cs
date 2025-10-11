@@ -14,6 +14,11 @@ public class PlayerHP : MonoBehaviour
     private bool isInvincible = false;          // 無敵状態フラグ
     private Coroutine invincibilityCoroutine;   // 無敵時間管理用コルーチン
 
+    [Header("点滅設定")]
+    public float blinkInterval = 0.1f; // 点滅の間隔（秒）
+    private Coroutine blinkCoroutine;  // 点滅管理用コルーチン
+    private Renderer[] playerRenderers; // プレイヤーのRendererコンポーネント配列
+
     [Header("UI References")]
     public GameObject heartPrefab;
     public Transform heartsContainer;
@@ -25,6 +30,9 @@ public class PlayerHP : MonoBehaviour
         currentHealth = maxHealth;
         CreateHeartUI();
         UpdateHealthUI();
+
+        // プレイヤーのすべてのRendererコンポーネントを取得
+        playerRenderers = GetComponentsInChildren<Renderer>();
     }
 
     void CreateHeartUI()
@@ -116,8 +124,15 @@ public class PlayerHP : MonoBehaviour
             Debug.Log("前の無敵時間を停止して新しい無敵時間を開始");
         }
 
+        // 点滅中なら停止
+        if (blinkCoroutine != null)
+        {
+            StopCoroutine(blinkCoroutine);
+        }
+
         isInvincible = true; // 確実に無敵状態にする
         invincibilityCoroutine = StartCoroutine(InvincibilityCoroutine());
+        blinkCoroutine = StartCoroutine(BlinkCoroutine());
     }
 
     // 無敵時間の処理を行うコルーチン
@@ -132,7 +147,42 @@ public class PlayerHP : MonoBehaviour
         isInvincible = false;
         invincibilityCoroutine = null;
 
+        // 点滅を停止して、プレイヤーを確実に表示状態にする
+        if (blinkCoroutine != null)
+        {
+            StopCoroutine(blinkCoroutine);
+            blinkCoroutine = null;
+        }
+        SetPlayerVisibility(true);
+
         Debug.Log("無敵時間終了");
+    }
+
+    // 点滅の処理を行うコルーチン
+    private IEnumerator BlinkCoroutine()
+    {
+        while (isInvincible)
+        {
+            // プレイヤーを非表示にする
+            SetPlayerVisibility(false);
+            yield return new WaitForSeconds(blinkInterval);
+
+            // プレイヤーを表示する
+            SetPlayerVisibility(true);
+            yield return new WaitForSeconds(blinkInterval);
+        }
+    }
+
+    // プレイヤーの表示/非表示を切り替えるメソッド
+    private void SetPlayerVisibility(bool isVisible)
+    {
+        foreach (Renderer renderer in playerRenderers)
+        {
+            if (renderer != null)
+            {
+                renderer.enabled = isVisible;
+            }
+        }
     }
 
     // 無敵状態かどうかを外部から確認できるメソッド
@@ -157,6 +207,10 @@ public class PlayerHP : MonoBehaviour
         if (invincibilityCoroutine != null)
         {
             StopCoroutine(invincibilityCoroutine);
+        }
+        if (blinkCoroutine != null)
+        {
+            StopCoroutine(blinkCoroutine);
         }
     }
 }
