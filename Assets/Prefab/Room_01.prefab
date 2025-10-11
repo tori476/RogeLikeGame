@@ -1474,6 +1474,8 @@ MonoBehaviour:
   attackRange: 2
   attackCooldown: 1.5
   attackDamage: 1
+  heartPrefab: {fileID: 8282753026809553761, guid: f72a2d5128798418da553ed927233211, type: 3}
+  heartDropChance: 1
   knockbackForce: 10
   knockbackDuration: 0.4
 --- !u!195 &1529846605195419839
