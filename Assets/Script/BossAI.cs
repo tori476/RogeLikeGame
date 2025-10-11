@@ -20,6 +20,9 @@ public class BossAI : EnemyAI
     public GameObject chargeIndicatorPrefab;    // 突進先の地面に表示するインジケーターのプレハブ
     public float chargeImpactRadius = 2.5f;     // 突進がヒットした際のダメージ範囲
 
+    [Header("ボス専用ドロップ")]
+    public GameObject bossSummonItemPrefab; // ボス召喚アイテムのプレハブ
+
     // ボスの状態を定義する
     private enum BossState
     {
@@ -296,6 +299,11 @@ public class BossAI : EnemyAI
     private void Die()
     {
         Debug.Log(gameObject.name + " は倒された！");
+        if (bossSummonItemPrefab != null)
+        {
+            Instantiate(bossSummonItemPrefab, transform.position, Quaternion.identity);
+            Debug.Log(gameObject.name + " が召喚アイテムをドロップしました！");
+        }
         OnBossDied?.Invoke(this);
         // このゲームオブジェクトをシーンから削除する
         Destroy(gameObject);

@@ -31,6 +31,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private Collider weaponCollider;
 
+    [Header("ボス召喚アビリティ")]
+    public GameObject summonedBossPrefab; // 召喚するボスのプレハブ
+    public Transform summonPoint;         // ボスを召喚する位置
+    public bool hasBossSummonAbility = false;
+
+
     // 武器のダメージ処理スクリプトへの参照
     private WeaponDamageDealer weaponDamageDealer;
 
@@ -145,6 +151,15 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    public void OnSpecialAbility(InputAction.CallbackContext context)
+    {
+        // ボタンが押された瞬間、かつアビリティを所持している場合
+        if (context.started && hasBossSummonAbility)
+        {
+            SummonBoss();
+        }
+    }
+
     public void StartAttack()
     {
         if (weaponCollider != null)
@@ -185,6 +200,35 @@ public class PlayerController : MonoBehaviour
         isMovementLocked = true;
         yield return new WaitForSeconds(duration);
         isMovementLocked = false;
+    }
+
+    // ボス召喚アビリティを付与するメソッド (BossSummonItemから呼ばれる)
+    public void GrantBossSummonAbility()
+    {
+        hasBossSummonAbility = true;
+        Debug.Log("ボス召喚アビリティを獲得！");
+        // ここでUIにアビリティが使えるようになったことを表示する処理などを追加できます
+    }
+
+    private void SummonBoss()
+    {
+        if (summonedBossPrefab == null)
+        {
+            Debug.LogError("召喚するボスのプレハブが設定されていません！");
+            return;
+        }
+
+        // 召喚位置を決める（プレイヤーの前方など）
+        Vector3 spawnPosition = summonPoint != null ? summonPoint.position : transform.position + transform.forward * 3.0f;
+
+        // ボスを召喚
+        GameObject boss = Instantiate(summonedBossPrefab, spawnPosition, transform.rotation);
+        SummonedBoss summonedBoss = boss.GetComponent<SummonedBoss>();
+
+
+        // アビリティを消費
+        hasBossSummonAbility = false;
+        Debug.Log("ボスを召喚し、アビリティを消費しました。");
     }
 
 

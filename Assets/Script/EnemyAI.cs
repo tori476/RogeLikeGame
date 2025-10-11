@@ -15,6 +15,11 @@ public class EnemyAI : MonoBehaviour
     public int attackDamage = 1;        // 敵の攻撃力を1に固定
     private float lastAttackTime = 0f;  // 最後に攻撃した時間
 
+    [Header("ドロップアイテム設定")]
+    public GameObject heartPrefab;      // ハートのプレハブをインスペクターから設定
+    [Range(0.0f, 1.0f)]
+    public float heartDropChance = 0.1f; // ハートをドロップする確率 (%)
+
     [Header("エフェクト設定")]
     public float knockbackForce = 10f;    // ノックバックの強さ
     public float knockbackDuration = 0.4f; // ノックバックする時間
@@ -163,6 +168,11 @@ public class EnemyAI : MonoBehaviour
     private void Die()
     {
         Debug.Log(gameObject.name + " は倒された！");
+        if (heartPrefab != null && UnityEngine.Random.value <= heartDropChance)
+        {
+            Instantiate(heartPrefab, transform.position, Quaternion.identity);
+            Debug.Log(gameObject.name + " がハートをドロップしました！");
+        }
         OnEnemyDied?.Invoke(this);
         // このゲームオブジェクトをシーンから削除する
         Destroy(gameObject);
