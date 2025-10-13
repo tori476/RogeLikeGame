@@ -10,6 +10,7 @@ public class DungeonManager : MonoBehaviour
 
     public GameObject startRoomPrefab; // スタート部屋専用
     public GameObject endRoomPrefab;   // エンド部屋（ボス部屋）専用
+    public GameObject treasureRoomPrefab;//宝箱部屋専用
     public GameObject[] normalRoomPrefabs;
 
     [Header("通路のプレハブ")]
@@ -65,7 +66,13 @@ public class DungeonManager : MonoBehaviour
             }
         }
 
-        // --- 3. エンド部屋の配置 ---
+        // --- 3. 宝箱部屋の配置 ---
+        if (treasureRoomPrefab != null)
+        {
+            PlaceTreasureRoom();
+        }
+
+        // --- 4. エンド部屋の配置 ---
         if (endRoomPrefab != null)
         {
             PlaceEndRoom();
@@ -89,6 +96,38 @@ public class DungeonManager : MonoBehaviour
         if (normalRoomPrefabs.Length == 0) return false;
         GameObject roomPrefab = normalRoomPrefabs[Random.Range(0, normalRoomPrefabs.Length)];
         return TryConnectNewItem(roomPrefab);
+    }
+
+    private void PlaceTreasureRoom()
+    {
+        // 利用可能なコネクターのリストをコピーしてシャッフルし、ランダムな接続を試みる
+        List<Transform> connectorsToTry = new List<Transform>(availableConnectors);
+        // Fisher-Yates shuffleアルゴリズムでリストをシャッフル
+        for (int i = 0; i < connectorsToTry.Count; i++)
+        {
+            Transform temp = connectorsToTry[i];
+            int randomIndex = Random.Range(i, connectorsToTry.Count);
+            connectorsToTry[i] = connectorsToTry[randomIndex];
+            connectorsToTry[randomIndex] = temp;
+        }
+
+        bool treasureRoomPlaced = false;
+        // シャッフルされたリストをループして配置を試みる
+        foreach (var connector in connectorsToTry)
+        {
+            // 既存の接続メソッドを再利用して配置を試行
+            if (TryConnectNewItem(treasureRoomPrefab, connector))
+            {
+                treasureRoomPlaced = true;
+                Debug.Log("宝箱部屋を配置しました。");
+                break; // 1つ配置できたらループを抜ける
+            }
+        }
+
+        if (!treasureRoomPlaced)
+        {
+            Debug.LogWarning("宝箱部屋を配置できる適切な場所が見つかりませんでした。");
+        }
     }
 
     void AddConnectorsToList(GameObject room)
