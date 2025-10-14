@@ -553,7 +553,7 @@ GameObject:
   - component: {fileID: 2667413500821229642}
   m_Layer: 0
   m_Name: EndRoom
-  m_TagString: Untagged
+  m_TagString: EndRoom
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1410,6 +1410,7 @@ MonoBehaviour:
   chargeIndicatorPrefab: {fileID: 5594279115082187016, guid: 5443f907905a044139c1e1d0dea75bd4, type: 3}
   chargeImpactRadius: 2.5
   bossSummonItemPrefab: {fileID: 7172555008452431983, guid: 949a3a7f1240c40c9b3273292b1f03e6, type: 3}
+  stairsPrefab: {fileID: 65406258319181547, guid: 388d9b17ab21db24abe453cf6da856ae, type: 3}
 --- !u!195 &6666112546472339561
 NavMeshAgent:
   m_ObjectHideFlags: 0
