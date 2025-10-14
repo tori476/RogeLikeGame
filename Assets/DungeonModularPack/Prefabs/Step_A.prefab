@@ -74,17 +74,54 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f63d02294ea68c14aae7768c670bfe03, type: 3}
       insertIndex: -1
-      addedObject: {fileID: -1845261227061905780}
+      addedObject: {fileID: 5276665138096680056}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f63d02294ea68c14aae7768c670bfe03, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 5276665138096680056}
+      addedObject: {fileID: 8955631968841302060}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f63d02294ea68c14aae7768c670bfe03, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7143033951656103559}
   m_SourcePrefab: {fileID: 100100000, guid: f63d02294ea68c14aae7768c670bfe03, type: 3}
 --- !u!1 &65406258319181547 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: f63d02294ea68c14aae7768c670bfe03, type: 3}
   m_PrefabInstance: {fileID: 876292577567898554}
   m_PrefabAsset: {fileID: 0}
---- !u!65 &-1845261227061905780
+--- !u!114 &5276665138096680056
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 65406258319181547}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 432fc58812f5e484b82209d1f39cb214, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StairsTrigger
+--- !u!64 &8955631968841302060
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 65406258319181547}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 4879846892455276950, guid: f63d02294ea68c14aae7768c670bfe03, type: 3}
+--- !u!65 &7143033951656103559
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -103,17 +140,5 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 4, y: 2, z: 4}
-  m_Center: {x: 2, y: 1, z: -1.9999999}
---- !u!114 &5276665138096680056
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 65406258319181547}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 432fc58812f5e484b82209d1f39cb214, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::StairsTrigger
+  m_Size: {x: 4, y: 1.3603649, z: 0.91905403}
+  m_Center: {x: 2, y: 2.7221751, z: -3.540473}
