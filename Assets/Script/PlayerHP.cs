@@ -25,6 +25,9 @@ public class PlayerHP : MonoBehaviour
 
     private Image[] heartImages;
 
+    [Header("ハートUIのRectTransform")]
+    public RectTransform heartUIRectTransform; // Inspectorで割り当て
+
     void Start()
     {
         currentHealth = maxHealth;
@@ -96,6 +99,12 @@ public class PlayerHP : MonoBehaviour
 
         // ダメージを受けたら必ず無敵時間を開始（死亡時も含む）
         StartInvincibility();
+
+        // ダメージを受けたときにハートUIを揺らす
+        if (heartUIRectTransform != null)
+        {
+            StartCoroutine(ShakeHeartUI());
+        }
 
         // HP チェック
         if (currentHealth <= 0)
@@ -212,5 +221,22 @@ public class PlayerHP : MonoBehaviour
         {
             StopCoroutine(blinkCoroutine);
         }
+    }
+
+    private IEnumerator ShakeHeartUI()
+    {
+        Vector3 originalPos = heartUIRectTransform.anchoredPosition;
+        float shakeAmount = 20f;
+        float shakeDuration = 0.2f;
+        float elapsed = 0f;
+        while (elapsed < shakeDuration)
+        {
+            float x = Mathf.Sin(elapsed * 40f) * shakeAmount;
+            float y = Mathf.Cos(elapsed * 40f) * shakeAmount * 0.5f;
+            heartUIRectTransform.anchoredPosition = originalPos + new Vector3(x, y, 0);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        heartUIRectTransform.anchoredPosition = originalPos;
     }
 }
