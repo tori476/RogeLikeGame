@@ -190,16 +190,33 @@ public class DungeonManager : MonoBehaviour
             }
         }
 
-        if (furthestConnector == null)
+        bool placed = false;
+        if (furthestConnector != null)
         {
-            Debug.LogError("エンド部屋を接続できるコネクターが見つかりませんでした。");
-            return;
+            // 2. 見つけた場所にエンド部屋を接続してみる
+            if (TryConnectNewItem(endRoomPrefab, furthestConnector))
+            {
+                placed = true;
+            }
         }
 
-        // 2. 見つけた場所にエンド部屋を接続してみる
-        if (!TryConnectNewItem(endRoomPrefab, furthestConnector))
+        // 配置できなかった場合はavailableConnectorsの中から順に配置を試みる
+        if (!placed)
         {
-            Debug.LogWarning("エンド部屋の配置に失敗しました。");
+            foreach (var connector in availableConnectors)
+            {
+                if (TryConnectNewItem(endRoomPrefab, connector))
+                {
+                    placed = true;
+                    Debug.Log("エンド部屋を強制配置しました。");
+                    break;
+                }
+            }
+        }
+
+        if (!placed)
+        {
+            Debug.LogError("エンド部屋の配置に完全に失敗しました。コネクターがありません。");
         }
     }
 
