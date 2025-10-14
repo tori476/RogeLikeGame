@@ -20,6 +20,11 @@ public class BossAI : EnemyAI
     public GameObject chargeIndicatorPrefab;    // 突進先の地面に表示するインジケーターのプレハブ
     public float chargeImpactRadius = 2.5f;     // 突進がヒットした際のダメージ範囲
 
+    [Header("ボス専用ドロップ")]
+    public GameObject bossSummonItemPrefab; // ボス召喚アイテムのプレハブ
+    [SerializeField]
+    private GameObject stairsPrefab; // 階段のプレハブ（Inspectorで割り当て可能に）
+
     // ボスの状態を定義する
     private enum BossState
     {
@@ -32,10 +37,14 @@ public class BossAI : EnemyAI
     private BossState currentState; // 現在の状態を保持する変数
     private Animator anim; // アニメーションを制御するため
 
+    public event Action<int> OnHealthChanged; // ボス専用のHP変更イベント
     public event Action<BossAI> OnBossDied;
 
     private Vector3 chargeTargetPosition;       // 突進の目標地点
     private GameObject currentChargeIndicator;  // 生成したインジケーターを保持する変数
+
+
+
 
 
     protected override void Start()
@@ -57,7 +66,7 @@ public class BossAI : EnemyAI
         }
 
         // 突進中以外は常にプレイヤーの方向を向く
-        if (currentState != BossState.Charging)
+        if (currentState == BossState.Chasing)
         {
             LookAtPlayer();
         }
@@ -240,7 +249,7 @@ public class BossAI : EnemyAI
     }
 
 
-    public void ActivateEnemy()
+    public override void ActivateEnemy()
     {
         // 既に起動済みなら何もしない
         if (isActivated) return;
@@ -252,12 +261,26 @@ public class BossAI : EnemyAI
             agent.enabled = true;
         }
         Debug.Log(this.gameObject.name + " が起動しました！");
+
+        BossUIController uiController = FindFirstObjectByType<BossUIController>();
+
+        // 見つかった場合のみ、UIのセットアップを依頼する
+        if (uiController != null)
+        {
+            uiController.SetupBossUI(this);
+        }
+        else
+        {
+            // 見つからなかった場合は、念のためログに警告を表示する
+            Debug.LogWarning("シーン内に BossUIController が見つかりませんでした。");
+        }
     }
 
-    public void TakeDamage(int damage, Transform attacker)
+    public override void TakeDamage(int damage, Transform attacker)
     {
         // 体力を減らす
         health -= damage;
+        OnHealthChanged?.Invoke(health);
         Debug.Log(gameObject.name + " の残り体力: " + health);
         if (knockbackCoroutine == null)
         {
@@ -271,36 +294,49 @@ public class BossAI : EnemyAI
             Die();
         }
     }
-    private IEnumerator Knockback(Transform attacker)
-    {
-        // AIの移動を一時的に停止
-        agent.enabled = false;
 
-        // 攻撃者から自分への方向ベクトルを計算（吹き飛ぶ方向）
-        Vector3 direction = (transform.position - attacker.position).normalized;
-        direction.y = 0; // 上下には吹き飛ばないようにする
-
-        float elapsedTime = 0f;
-        while (elapsedTime < knockbackDuration)
-        {
-            // 計算した方向へ、力を加えながら後退させる
-            transform.position += direction * knockbackForce * Time.deltaTime;
-            elapsedTime += Time.deltaTime;
-            yield return null; // 1フレーム待機
-        }
-
-        // AIの移動を再開
-        agent.enabled = true;
-        knockbackCoroutine = null; // コルーチンが終了したことを示す
-    }
 
 
     // 死亡時の処理を行うメソッド
     private void Die()
     {
         Debug.Log(gameObject.name + " は倒された！");
+        if (bossSummonItemPrefab != null)
+        {
+            Instantiate(bossSummonItemPrefab, transform.position, Quaternion.identity);
+            Debug.Log(gameObject.name + " が召喚アイテムをドロップしました！");
+        }
+        // 階段生成処理（EndRoomの中心に生成）
+        if (stairsPrefab != null)
+        {
+            GameObject endRoom = GameObject.FindGameObjectWithTag("EndRoom");
+            Vector3 stairsPos = transform.position;
+            if (endRoom != null)
+            {
+                // EndRoomのRendererの中心座標を取得
+                Renderer rend = endRoom.GetComponentInChildren<Renderer>();
+                if (rend != null)
+                {
+                    stairsPos = rend.bounds.center;
+                }
+                else
+                {
+                    stairsPos = endRoom.transform.position;
+                }
+            }
+            Instantiate(stairsPrefab, stairsPos, Quaternion.identity);
+            Debug.Log("階段をEndRoomの中心に出現させました");
+        }
         OnBossDied?.Invoke(this);
-        // このゲームオブジェクトをシーンから削除する
         Destroy(gameObject);
+    }
+    private void OnDestroy()
+    {
+        // もしインジケーター（突進の目印）が生成されていて、まだシーンに残っている場合に
+        if (currentChargeIndicator != null)
+        {
+            // インジケーターも一緒に破棄する
+            Destroy(currentChargeIndicator);
+        }
     }
 }

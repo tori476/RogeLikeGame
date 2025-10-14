@@ -1,12 +1,23 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem; // Input Systemを使用
+using System.Collections;
 
 public class PlayerHP : MonoBehaviour
 {
     [Header("HP Settings")]
     public int maxHealth = 3;
     private int currentHealth;
+
+    [Header("無敵時間設定")]
+    public float invincibilityDuration = 1.5f; // 無敵時間（秒）
+    private bool isInvincible = false;          // 無敵状態フラグ
+    private Coroutine invincibilityCoroutine;   // 無敵時間管理用コルーチン
+
+    [Header("点滅設定")]
+    public float blinkInterval = 0.1f; // 点滅の間隔（秒）
+    private Coroutine blinkCoroutine;  // 点滅管理用コルーチン
+    private Renderer[] playerRenderers; // プレイヤーのRendererコンポーネント配列
 
     [Header("UI References")]
     public GameObject heartPrefab;
@@ -19,6 +30,9 @@ public class PlayerHP : MonoBehaviour
         currentHealth = maxHealth;
         CreateHeartUI();
         UpdateHealthUI();
+
+        // プレイヤーのすべてのRendererコンポーネントを取得
+        playerRenderers = GetComponentsInChildren<Renderer>();
     }
 
     void CreateHeartUI()
@@ -66,15 +80,28 @@ public class PlayerHP : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
+        // 無敵時間中はダメージを受けない
+        if (isInvincible)
+        {
+            Debug.Log("無敵時間中のためダメージを無効化しました");
+            return;
+        }
+
+        // ダメージ処理
         currentHealth -= damage;
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
         UpdateHealthUI();
 
         Debug.Log($"ダメージを受けました。現在のHP: {currentHealth}/{maxHealth}");
 
+        // ダメージを受けたら必ず無敵時間を開始（死亡時も含む）
+        StartInvincibility();
+
+        // HP チェック
         if (currentHealth <= 0)
         {
             Debug.Log("プレイヤーのHPが0になりました");
+            // ゲームオーバー処理をここに追加可能
         }
     }
 
@@ -87,6 +114,83 @@ public class PlayerHP : MonoBehaviour
         Debug.Log($"回復しました。現在のHP: {currentHealth}/{maxHealth}");
     }
 
+    // 無敵時間を開始するメソッド
+    private void StartInvincibility()
+    {
+        // 既に無敵時間中なら、前のコルーチンを停止して新しく開始
+        if (invincibilityCoroutine != null)
+        {
+            StopCoroutine(invincibilityCoroutine);
+            Debug.Log("前の無敵時間を停止して新しい無敵時間を開始");
+        }
+
+        // 点滅中なら停止
+        if (blinkCoroutine != null)
+        {
+            StopCoroutine(blinkCoroutine);
+        }
+
+        isInvincible = true; // 確実に無敵状態にする
+        invincibilityCoroutine = StartCoroutine(InvincibilityCoroutine());
+        blinkCoroutine = StartCoroutine(BlinkCoroutine());
+    }
+
+    // 無敵時間の処理を行うコルーチン
+    private IEnumerator InvincibilityCoroutine()
+    {
+        Debug.Log("無敵時間開始");
+
+        // 指定された時間だけ無敵状態を維持
+        yield return new WaitForSeconds(invincibilityDuration);
+
+        // 無敵時間終了
+        isInvincible = false;
+        invincibilityCoroutine = null;
+
+        // 点滅を停止して、プレイヤーを確実に表示状態にする
+        if (blinkCoroutine != null)
+        {
+            StopCoroutine(blinkCoroutine);
+            blinkCoroutine = null;
+        }
+        SetPlayerVisibility(true);
+
+        Debug.Log("無敵時間終了");
+    }
+
+    // 点滅の処理を行うコルーチン
+    private IEnumerator BlinkCoroutine()
+    {
+        while (isInvincible)
+        {
+            // プレイヤーを非表示にする
+            SetPlayerVisibility(false);
+            yield return new WaitForSeconds(blinkInterval);
+
+            // プレイヤーを表示する
+            SetPlayerVisibility(true);
+            yield return new WaitForSeconds(blinkInterval);
+        }
+    }
+
+    // プレイヤーの表示/非表示を切り替えるメソッド
+    private void SetPlayerVisibility(bool isVisible)
+    {
+        foreach (Renderer renderer in playerRenderers)
+        {
+            if (renderer != null)
+            {
+                renderer.enabled = isVisible;
+            }
+        }
+    }
+
+    // 無敵状態かどうかを外部から確認できるメソッド
+    public bool IsInvincible()
+    {
+        return isInvincible;
+    }
+
     public int GetCurrentHealth()
     {
         return currentHealth;
@@ -95,5 +199,18 @@ public class PlayerHP : MonoBehaviour
     public int GetMaxHealth()
     {
         return maxHealth;
+    }
+
+    // オブジェクトが破棄される際にコルーチンを停止
+    private void OnDestroy()
+    {
+        if (invincibilityCoroutine != null)
+        {
+            StopCoroutine(invincibilityCoroutine);
+        }
+        if (blinkCoroutine != null)
+        {
+            StopCoroutine(blinkCoroutine);
+        }
     }
 }
