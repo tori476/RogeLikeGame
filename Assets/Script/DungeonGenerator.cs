@@ -19,11 +19,14 @@ public class DungeonManager : MonoBehaviour
     [Header("壁・扉プレハブ")]
     public GameObject wallPrefab;
 
+    [Header("階段プレハブ")]
+    public GameObject stairsPrefab;
+
     [Header("ダンジョン設定")]
     public int numberOfNormalRooms = 10;
     public int maxPlacementTries = 50; // 最大試行回数
 
-    private List<GameObject> spawnedRooms = new List<GameObject>();
+    public List<GameObject> spawnedRooms = new List<GameObject>();
     private List<Bounds> spawnedRoomBounds = new List<Bounds>(); // Boundsをキャッシュするリスト
     public List<Transform> availableConnectors = new List<Transform>();
 
@@ -38,7 +41,35 @@ public class DungeonManager : MonoBehaviour
         GenerateDungeon();
     }
 
-    void GenerateDungeon()
+    public void RegenerateDungeon()
+    {
+        // 既存の部屋・階段を全て削除
+        foreach (var room in spawnedRooms)
+        {
+            if (room != null) Destroy(room);
+        }
+        spawnedRooms.Clear();
+        spawnedRoomBounds.Clear();
+        availableConnectors.Clear();
+        usedConnectorPositions.Clear();
+        // 階段も全て削除
+        foreach (var stairs in GameObject.FindGameObjectsWithTag("Stairs"))
+        {
+            Destroy(stairs);
+        }
+        // NavMeshSurface再取得
+        navMeshSurface = GetComponent<NavMeshSurface>();
+        // 新しくダンジョン生成
+        GenerateDungeon();
+        // プレイヤーを新しいスタート部屋に移動
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null && spawnedRooms.Count > 0)
+        {
+            player.transform.position = spawnedRooms[0].transform.position + Vector3.up * 2;
+        }
+    }
+
+    private void GenerateDungeon()
     {
         // --- 1. スタート部屋の配置 ---
         if (startRoomPrefab == null)
@@ -195,7 +226,11 @@ public class DungeonManager : MonoBehaviour
 
         // 1. 新しい部屋を生成し、そのコネクターをランダムに選ぶ
         GameObject newItem = Instantiate(itemPrefab);
+        // NavMeshAgentがあれば一時的に無効化（エラー対策）
+        var navAgents = newItem.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>(true);
+        foreach (var agent in navAgents) agent.enabled = false;
         Transform[] newItemConnectors = GetAllConnectors(newItem);
+
         if (newItemConnectors.Length == 0) // コネクターがないプレハブはエラー
         {
             Debug.LogError($"プレハブ '{itemPrefab.name}' に Connector がありません。");
@@ -340,5 +375,20 @@ public class DungeonManager : MonoBehaviour
         // 1フレーム待機して、すべてのオブジェクトが確実に配置されるのを待つ
         yield return null;
         navMeshSurface.BuildNavMesh();
+        // NavMeshAgentを有効化
+        foreach (var room in spawnedRooms)
+        {
+            var navAgents = room.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>(true);
+            foreach (var agent in navAgents)
+            {
+                agent.enabled = true;
+            }
+        }
+        // NavMesh Bake後にプレイヤーをスタート部屋に移動
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            player.transform.position = new Vector3(-0.22f, 1.05f, -9.79f);
+        }
     }
 }

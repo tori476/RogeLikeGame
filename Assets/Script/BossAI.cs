@@ -22,6 +22,8 @@ public class BossAI : EnemyAI
 
     [Header("ボス専用ドロップ")]
     public GameObject bossSummonItemPrefab; // ボス召喚アイテムのプレハブ
+    [SerializeField]
+    private GameObject stairsPrefab; // 階段のプレハブ（Inspectorで割り当て可能に）
 
     // ボスの状態を定義する
     private enum BossState
@@ -304,8 +306,28 @@ public class BossAI : EnemyAI
             Instantiate(bossSummonItemPrefab, transform.position, Quaternion.identity);
             Debug.Log(gameObject.name + " が召喚アイテムをドロップしました！");
         }
+        // 階段生成処理（EndRoomの中心に生成）
+        if (stairsPrefab != null)
+        {
+            GameObject endRoom = GameObject.FindGameObjectWithTag("EndRoom");
+            Vector3 stairsPos = transform.position;
+            if (endRoom != null)
+            {
+                // EndRoomのRendererの中心座標を取得
+                Renderer rend = endRoom.GetComponentInChildren<Renderer>();
+                if (rend != null)
+                {
+                    stairsPos = rend.bounds.center;
+                }
+                else
+                {
+                    stairsPos = endRoom.transform.position;
+                }
+            }
+            Instantiate(stairsPrefab, stairsPos, Quaternion.identity);
+            Debug.Log("階段をEndRoomの中心に出現させました");
+        }
         OnBossDied?.Invoke(this);
-        // このゲームオブジェクトをシーンから削除する
         Destroy(gameObject);
     }
     private void OnDestroy()
