@@ -1844,6 +1844,7 @@ MonoBehaviour:
   blinkInterval: 0.1
   heartPrefab: {fileID: 2336036474711145968, guid: 01c12318df08a4b6ca6fdd57e6cc1d0c, type: 3}
   heartsContainer: {fileID: 63960679}
+  heartUIRectTransform: {fileID: 63960679}
 --- !u!1 &1311242596
 GameObject:
   m_ObjectHideFlags: 0
@@ -2280,8 +2281,10 @@ MonoBehaviour:
   - {fileID: 3760890723529728177, guid: 6ddb7619c7ceb4b28ab38a1c690bdb4b, type: 3}
   corridorPrefabs: []
   wallPrefab: {fileID: 1211182161564370512, guid: 749aba12397144121bf3c0ce307d3625, type: 3}
+  stairsPrefab: {fileID: 0}
   numberOfNormalRooms: 10
   maxPlacementTries: 50
+  spawnedRooms: []
   availableConnectors: []
 --- !u!4 &1896815922
 Transform:
