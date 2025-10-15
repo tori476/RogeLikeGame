@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using DG.Tweening;
-using Microsoft.Unity.VisualStudio.Editor;
+using UnityEngine.UI;
 
 public class StartButtonController : MonoBehaviour
 {
@@ -11,6 +11,10 @@ public class StartButtonController : MonoBehaviour
     public void OnStartButtonClicked()
     {
         cam.transform.DOMove(new Vector3(0, 0, 5f), 2f).SetEase(Ease.InOutBack);
-        SceneManager.LoadScene("RoguLike");
+        fade.DOFade(1f, 2f).OnComplete(() =>
+        {
+            SceneManager.LoadScene("RoguLike");
+        });
+
     }
 }
