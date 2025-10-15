@@ -1140,6 +1140,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StartButtonController
   cam: {fileID: 1141311154}
+  fade: {fileID: 1645713770}
 --- !u!1001 &192395392
 PrefabInstance:
   m_ObjectHideFlags: 0
