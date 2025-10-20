@@ -36,10 +36,11 @@ public class PlayerController : MonoBehaviour
     public Transform summonPoint;         // ボスを召喚する位置
     public bool hasBossSummonAbility = false;
 
+    private Transform lockOnTarget; // ロックオン対象
+    private bool isLockingOn = false; // ロックオン状態
 
     // 武器のダメージ処理スクリプトへの参照
     private WeaponDamageDealer weaponDamageDealer;
-
 
     private bool isDashing = false;
     private bool isCharging = false;
@@ -53,6 +54,13 @@ public class PlayerController : MonoBehaviour
 
     private Animator anim;
 
+    private InputSystem_Actions inputActions;
+
+    void Awake()
+    {
+        inputActions = new InputSystem_Actions();
+    }
+
     void Start()
     {
         controller = GetComponent<CharacterController>();
@@ -65,6 +73,18 @@ public class PlayerController : MonoBehaviour
                 weaponDamageDealer.Initialize(this.transform);
             }
         }
+    }
+
+    void OnEnable()
+    {
+        inputActions.Player.LockOn.performed += OnLockOn;
+        inputActions.Enable();
+    }
+
+    void OnDisable()
+    {
+        inputActions.Player.LockOn.performed -= OnLockOn;
+        inputActions.Disable();
     }
 
     // Player Inputコンポーネントが "Move" アクションを検出したときに呼び出される
@@ -160,6 +180,28 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    public void OnLockOn(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            if (!isLockingOn)
+            {
+                // 最も近い敵をロックオン
+                lockOnTarget = FindNearestEnemy();
+                if (lockOnTarget != null)
+                {
+                    isLockingOn = true;
+                }
+            }
+            else
+            {
+                // ロックオン解除
+                isLockingOn = false;
+                lockOnTarget = null;
+            }
+        }
+    }
+
     public void StartAttack()
     {
         if (weaponCollider != null)
@@ -231,6 +273,22 @@ public class PlayerController : MonoBehaviour
         Debug.Log("ボスを召喚し、アビリティを消費しました。");
     }
 
+    private Transform FindNearestEnemy()
+    {
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+        Transform nearest = null;
+        float minDist = Mathf.Infinity;
+        foreach (var enemy in enemies)
+        {
+            float dist = Vector3.Distance(transform.position, enemy.transform.position);
+            if (dist < minDist)
+            {
+                minDist = dist;
+                nearest = enemy.transform;
+            }
+        }
+        return nearest;
+    }
 
     void Update()
     {
@@ -248,6 +306,17 @@ public class PlayerController : MonoBehaviour
 
             // 溜め中は移動処理を行わない
             return;
+        }
+
+        if (isLockingOn && lockOnTarget != null)
+        {
+            // プレイヤーの向きをロックオン対象に向ける
+            Vector3 direction = (lockOnTarget.position - transform.position).normalized;
+            direction.y = 0;
+            if (direction != Vector3.zero)
+            {
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), Time.deltaTime * 10f);
+            }
         }
 
         HandleMovement();
