@@ -1,6 +1,6 @@
 name: Acquire activation file
 on:
-  workflow_dispatch: {} # ここをスペース2つでインデント
+  workflow_dispatch: {}
 jobs:
   activation:
     name: Request manual activation file
@@ -11,7 +11,7 @@ jobs:
         uses: game-ci/unity-request-activation-file@v2
         with:
           # あなたのプロジェクトのUnityバージョンに合わせる
-          unityVersion: 6000.2.2f1 
+          unityVersion: 6000.2.2f1
       - name: Expose as artifact
         uses: actions/upload-artifact@v3
         with:
