@@ -22,6 +22,8 @@ public class SummonedBoss : MonoBehaviour
     private Transform targetEnemy;
     private GameObject chargeIndicatorInstance;
 
+    private bool isAttacking = false;
+
     void Awake()
     {
         // 必要なコンポーネントを自動で取得
@@ -33,18 +35,24 @@ public class SummonedBoss : MonoBehaviour
     {
         // 最も近い敵を探してターゲットに設定
         FindClosestEnemy();
+        // 突進攻撃のコルーチンをここで一度だけ開始
+        StartCoroutine(ChargeAttackCoroutine());
     }
 
     // PlayerControllerから呼び出されるメソッド
     void Update()
     {
-        // 突進攻撃のコルーチンを開始
-        StartCoroutine(ChargeAttackCoroutine());
+        // 攻撃中でない場合のみ、コルーチンを開始する
+        if (!isAttacking)
+        {
+            StartCoroutine(ChargeAttackCoroutine());
+        }
     }
 
     // シーン内にいる"Enemy"タグがついたオブジェクトの中から、最も近いものを探す
     private void FindClosestEnemy()
     {
+
         // 自分自身を除外してすべての敵を見つける
         EnemyAI[] allEnemies = FindObjectsByType<EnemyAI>(FindObjectsSortMode.None).Where(e => e.gameObject != this.gameObject).ToArray();
 
@@ -66,6 +74,8 @@ public class SummonedBoss : MonoBehaviour
 
     private IEnumerator ChargeAttackCoroutine()
     {
+        isAttacking = true; // コルーチン開始時にフラグを立てる
+
         // --- 1. 準備フェーズ ---
         Vector3 targetPosition;
 
@@ -100,27 +110,29 @@ public class SummonedBoss : MonoBehaviour
         yield return new WaitForSeconds(chargePreparationTime);
 
         // --- 2. 実行フェーズ ---
+
         // インジケーターを消去
         if (chargeIndicatorInstance != null)
         {
             Destroy(chargeIndicatorInstance);
         }
 
-        // 目標地点に向かって直接移動させる
-        transform.position = Vector3.MoveTowards(transform.position, targetPosition, chargeSpeed * Time.deltaTime);
 
         // 突進アニメーションを再生 (Animatorに "ChargeAttack" というトリガーがある想定)
         anim.SetTrigger("ChargeAttack");
 
         // 目的地に到着するまで待機（またはタイムアウト）
         float chargeStartTime = Time.time;
-        if (Vector3.Distance(transform.position, targetPosition) < 0.5f)
+        while (Vector3.Distance(transform.position, targetPosition) > 0.5f && (Time.time - chargeStartTime) < 5.0f)
         {
-            // 5秒以上突進し続けたら、強制的に終了する（壁にハマる対策）
-            if (Time.time - chargeStartTime > 5.0f)
-            {
-                Destroy(gameObject);
-            }
+            // 毎フレーム、目標地点に向かって移動を続ける
+            transform.position = Vector3.MoveTowards(
+                transform.position,
+                targetPosition,
+                chargeSpeed * Time.deltaTime // chargeSpeed * Time.deltaTime で移動距離を計算
+            );
+
+            // 1フレーム待機して、次のフレームでループを再開
             yield return null;
         }
 
@@ -145,6 +157,7 @@ public class SummonedBoss : MonoBehaviour
                 Debug.Log($"{enemy.name} に {chargeDamage} の突進ダメージを与えた！");
             }
         }
+
 
         // --- 4. 消滅フェーズ ---
         // 少し待ってから自分自身をシーンから削除
