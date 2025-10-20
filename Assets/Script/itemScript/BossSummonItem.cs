@@ -1,35 +1,20 @@
 // BossSummonItem.cs
 using UnityEngine;
 
-public class BossSummonItem : MonoBehaviour
+// BossSummonItem は ItemBase を継承する
+public class BossSummonItem : ItemBase
 {
+    // Start()とUpdate()は基底クラスのものを利用するため、今回は記述しない。
 
-    Rigidbody rb;
-
-    private void Start()
+    // プレイヤーに与える効果（ボス召喚アビリティ付与）を実装
+    protected override void ApplyEffect(GameObject playerObject)
     {
-        rb = GetComponent<Rigidbody>();
-
-        rb.AddForce(Random.Range(-1000, 1000), 3000, Random.Range(-1000, 1000));
-    }
-
-    private void Update()
-    {
-        transform.Rotate(0, 0.1f, 0);
-    }
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Player"))
+        PlayerController playerController = playerObject.GetComponent<PlayerController>();
+        if (playerController != null)
         {
-            PlayerController playerController = other.GetComponent<PlayerController>();
-            if (playerController != null)
-            {
-                // プレイヤーにボス召喚アビリティを付与する
-                playerController.GrantBossSummonAbility();
-
-                // アイテムを消滅させる
-                Destroy(gameObject);
-            }
+            // プレイヤーにボス召喚アビリティを付与する
+            playerController.GrantBossSummonAbility();
+            Debug.Log("プレイヤーがボス召喚アイテムを取得しました！");
         }
     }
 }
