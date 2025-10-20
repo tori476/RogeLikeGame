@@ -1764,6 +1764,10 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 06f36473-5d8e-41c1-8a05-0c11a4eb27ea
     m_ActionName: 'Player/SummonBoss[/Keyboard/e]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 585fb450-6aeb-4efd-a23a-44de58622b1f
+    m_ActionName: 'Player/LockOn[/Keyboard/tab]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: 
