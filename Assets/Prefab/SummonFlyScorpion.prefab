@@ -478,8 +478,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d7fc355b4d5b949cb828d8d5d7f0d847, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SummonedBoss
-  chargePreparationTime: 1.5
-  chargeSpeed: 20
+  chargePreparationTime: 0.3
+  chargeSpeed: 40
   chargeDamage: 50
   chargeImpactRadius: 3
   chargeIndicatorPrefab: {fileID: 0}
