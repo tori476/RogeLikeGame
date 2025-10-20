@@ -1,13 +1,12 @@
 name: Acquire activation file
-on: # <-- 2行目。on:は行頭から始める
-  workflow_dispatch: {} # <-- on: の下はスペース2つでインデント
-
-jobs: # <-- 行頭から始める
-  activation: # <-- jobs: の下はスペース2つでインデント
+on:
+  workflow_dispatch: {} # ここをスペース2つでインデント
+jobs:
+  activation:
     name: Request manual activation file
     runs-on: ubuntu-latest
-    steps: # <-- activation: の下はスペース4つでインデント
-      - name: Request manual activation file # <-- steps: の下はスペース6つでインデント
+    steps:
+      - name: Request manual activation file
         id: getManualLicenseFile
         uses: game-ci/unity-request-activation-file@v2
         with:
