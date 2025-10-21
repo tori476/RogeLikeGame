@@ -40,6 +40,13 @@ public class PlayerHP : MonoBehaviour
 
     void CreateHeartUI()
     {
+        if (heartsContainer != null)
+        {
+            foreach (Transform child in heartsContainer)
+            {
+                Destroy(child.gameObject);
+            }
+        }
         heartImages = new Image[maxHealth];
 
         for (int i = 0; i < maxHealth; i++)
@@ -112,6 +119,14 @@ public class PlayerHP : MonoBehaviour
             Debug.Log("プレイヤーのHPが0になりました");
             // ゲームオーバー処理をここに追加可能
         }
+    }
+
+    public void MaxHP()
+    {
+        maxHealth += 1;
+        currentHealth += 1;
+        CreateHeartUI();
+        UpdateHealthUI();
     }
 
     public void Heal(int healAmount)
