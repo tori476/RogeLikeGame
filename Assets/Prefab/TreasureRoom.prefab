@@ -577,6 +577,37 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &3434717564888116002
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7940536206811797202}
+  m_Layer: 0
+  m_Name: ItemSpawnPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7940536206811797202
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3434717564888116002}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.4, z: 0}
+  m_LocalScale: {x: 0.33333334, y: 0.33333334, z: 0.33333334}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8860738285087893636}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3922710928792911927
 GameObject:
   m_ObjectHideFlags: 0
@@ -1318,7 +1349,10 @@ PrefabInstance:
     - {fileID: 8574870390125998835, guid: 773862bc7f037481eb6475eee5c89f70, type: 3}
     - {fileID: 2829448216751721269, guid: 773862bc7f037481eb6475eee5c89f70, type: 3}
     - {fileID: -6816878468835546769, guid: 773862bc7f037481eb6475eee5c89f70, type: 3}
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 773862bc7f037481eb6475eee5c89f70, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7940536206811797202}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 773862bc7f037481eb6475eee5c89f70, type: 3}
       insertIndex: -1
@@ -1453,6 +1487,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a70f67db4f4164be7bca7ca67f355740, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TreasureBox
+  droppableItems:
+  - {fileID: 5319370966736654105, guid: 5dbe7740209414c0fa5ba2f573c389b6, type: 3}
+  dropPoint: {fileID: 7940536206811797202}
 --- !u!4 &8860738285087893636 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 773862bc7f037481eb6475eee5c89f70, type: 3}
