@@ -170,7 +170,7 @@ public class EnemyAI : MonoBehaviour
         Debug.Log(gameObject.name + " は倒された！");
         if (heartPrefab != null && UnityEngine.Random.value <= heartDropChance)
         {
-            Instantiate(heartPrefab, transform.position, Quaternion.identity);
+            Instantiate(heartPrefab, new Vector3(transform.position.x, transform.position.y + 2, transform.position.z), Quaternion.identity);
             Debug.Log(gameObject.name + " がハートをドロップしました！");
         }
         OnEnemyDied?.Invoke(this);

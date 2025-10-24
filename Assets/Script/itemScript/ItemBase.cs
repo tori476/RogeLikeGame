@@ -19,7 +19,7 @@ public abstract class ItemBase : MonoBehaviour
 
         // ドロップ時のランダムな初期力を加える（共通処理）
         // Y軸の力は固定で、XとZにランダムな力を加える
-        rb.AddForce(Random.Range(-1000, 1000), 3000, Random.Range(-1000, 1000));
+        rb.AddForce(Random.Range(-200, 200), 50, Random.Range(-200, 200));
     }
 
     // アイテムの回転処理
