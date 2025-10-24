@@ -44,6 +44,8 @@ public class PlayerController : MonoBehaviour
 
     private bool isDashing = false;
     private bool isCharging = false;
+
+    private bool isChargingAttack = false;
     private float chargeStartTime;
 
     private CharacterController controller;
@@ -122,6 +124,13 @@ public class PlayerController : MonoBehaviour
         // ボタンが押された瞬間の処理
         if (context.started)
         {
+            if (!isChargingAttack)
+            {
+                // 【通常攻撃】
+                anim.SetTrigger("Attack");
+                StartCoroutine(LockMovementForDuration(normalAttackDuration));
+                return;
+            }
             isCharging = true;
             chargeStartTime = Time.time;
         }
@@ -250,6 +259,12 @@ public class PlayerController : MonoBehaviour
         hasBossSummonAbility = true;
         Debug.Log("ボス召喚アビリティを獲得！");
         // ここでUIにアビリティが使えるようになったことを表示する処理などを追加できます
+    }
+
+    //チャージ攻撃を可能にする
+    public void ChargeAttackItem()
+    {
+        isChargingAttack = true;
     }
 
     private void SummonBoss()
