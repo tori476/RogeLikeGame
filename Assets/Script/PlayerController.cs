@@ -305,6 +305,11 @@ public class PlayerController : MonoBehaviour
         return nearest;
     }
 
+    public void ResetVelocity()
+    {
+        playerVelocity = Vector3.zero;
+    }
+
     void Update()
     {
         if (isCharging)

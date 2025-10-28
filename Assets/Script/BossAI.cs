@@ -6,9 +6,9 @@ using System;
 public class BossAI : EnemyAI
 {
     [Header("ボス専用設定")]
-    public float attackRange = 3.0f;    // 攻撃を開始するプレイヤーとの距離
-    public float attackCooldown = 2.0f; // 攻撃後の待ち時間（秒）
-    public int attackDamage = 20;       // ボスの攻撃力
+    public float bossAttackRange = 3.0f;    // 攻撃を開始するプレイヤーとの距離
+    public float bossAttackCooldown = 2.0f; // 攻撃後の待ち時間（秒）
+    public int bossAttackDamage = 20;       // ボスの攻撃力
 
     [Header("突進攻撃の設定")]
     public float chargeAttackRange = 15.0f;     // 突進攻撃を考慮し始める距離
@@ -123,7 +123,7 @@ public class BossAI : EnemyAI
         }
 
         // 通常攻撃の射程内か？
-        if (distanceToPlayer <= attackRange)
+        if (distanceToPlayer <= bossAttackRange)
         {
             StartCoroutine(AttackCoroutine());
         }
@@ -142,7 +142,7 @@ public class BossAI : EnemyAI
         // ここではすぐにクールダウンへ移行
         yield return null; // 1フレーム待ってからクールダウンへ
 
-        StartCoroutine(CooldownCoroutine(attackCooldown));
+        StartCoroutine(CooldownCoroutine(bossAttackCooldown));
     }
 
     // --- 突進準備状態の処理（コルーチン） ---
@@ -221,13 +221,13 @@ public class BossAI : EnemyAI
     public void DealDamageToPlayer()
     {
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-        if (distanceToPlayer <= attackRange)
+        if (distanceToPlayer <= bossAttackRange)
         {
             PlayerHP playerHP = player.GetComponent<PlayerHP>();
             if (playerHP != null)
             {
-                playerHP.TakeDamage(attackDamage);
-                Debug.Log("ボスがプレイヤーに " + attackDamage + " のダメージを与えた！");
+                playerHP.TakeDamage(bossAttackDamage);
+                Debug.Log("ボスがプレイヤーに " + bossAttackDamage + " のダメージを与えた！");
             }
         }
     }
@@ -286,7 +286,6 @@ public class BossAI : EnemyAI
         {
             knockbackCoroutine = StartCoroutine(Knockback(attacker));
         }
-
 
         // 体力が0以下になったら
         if (health <= 0)
