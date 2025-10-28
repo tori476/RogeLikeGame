@@ -39,6 +39,11 @@ public class DungeonManager : MonoBehaviour
     {
         navMeshSurface = GetComponent<NavMeshSurface>();
         GenerateDungeon();
+        // NavMesh構築
+        if (navMeshSurface != null)
+        {
+            navMeshSurface.BuildNavMesh();
+        }
     }
 
     public void RegenerateDungeon()
@@ -61,11 +66,44 @@ public class DungeonManager : MonoBehaviour
         navMeshSurface = GetComponent<NavMeshSurface>();
         // 新しくダンジョン生成
         GenerateDungeon();
-        // プレイヤーを新しいスタート部屋に移動
+        // NavMesh再構築
+        if (navMeshSurface != null)
+        {
+            navMeshSurface.BuildNavMesh();
+        }
+        // NavMeshAgentを全ての部屋で有効化
+        foreach (var room in spawnedRooms)
+        {
+            var navAgents = room.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>(true);
+            foreach (var agent in navAgents)
+            {
+                agent.enabled = true;
+            }
+        }
+        // プレイヤーをspawnedRooms[0]（スタート部屋）のNavMesh上に移動
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null && spawnedRooms.Count > 0)
         {
-            player.transform.position = spawnedRooms[0].transform.position + Vector3.up * 2;
+            Vector3 startPos = new Vector3(0f, 10f, 0f);
+
+            // CharacterControllerの座標リセット対応
+            var controller = player.GetComponent<CharacterController>();
+            if (controller != null)
+            {
+                controller.enabled = false;
+                player.transform.position = startPos;
+                controller.enabled = true;
+            }
+            else
+            {
+                player.transform.position = startPos;
+            }
+
+            var pc = player.GetComponent<PlayerController>();
+            if (pc != null)
+            {
+                pc.ResetVelocity();
+            }
         }
     }
 
@@ -116,8 +154,11 @@ public class DungeonManager : MonoBehaviour
         }
 
         CloseOpenConnectors();
-        // フレーム遅延を入れてからNavMeshを構築
-        StartCoroutine(BuildNavMeshDelayed());
+        // NavMesh構築（フレーム遅延不要、即時構築）
+        if (navMeshSurface != null)
+        {
+            navMeshSurface.BuildNavMesh();
+        }
     }
 
     // 部屋の配置を試行するメソッド
@@ -297,6 +338,18 @@ public class DungeonManager : MonoBehaviour
             {
                 availableConnectors.Add(connector); // 新しい部屋の未使用コネクターを追加
             }
+        }
+
+        // NavMesh再構築（部屋追加直後）
+        if (navMeshSurface != null)
+        {
+            navMeshSurface.BuildNavMesh();
+        }
+        // NavMeshAgentを有効化
+        navAgents = newItem.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>(true);
+        foreach (var agent in navAgents)
+        {
+            agent.enabled = true;
         }
         return true;
     }

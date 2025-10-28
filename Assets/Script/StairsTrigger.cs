@@ -9,40 +9,15 @@ public class StairsTrigger : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             triggered = true;
-            // フェードアウト処理がある場合はここで呼び出し、完了後にダンジョン再生成
-            var fadeManagerObj = GameObject.FindObjectOfType(typeof(MonoBehaviour));
-            if (fadeManagerObj != null && fadeManagerObj.GetType().Name == "FadeManager")
+            // 暗転演出やマップ再生前にダンジョン再生成
+            DungeonManager dungeonManager = FindObjectOfType<DungeonManager>();
+            if (dungeonManager != null)
             {
-                var fadeManager = fadeManagerObj as MonoBehaviour;
-                var method = fadeManager.GetType().GetMethod("FadeOut");
-                if (method != null)
-                {
-                    method.Invoke(fadeManager, new object[] { (System.Action)(() => {
-                        DungeonManager manager = FindFirstObjectByType<DungeonManager>();
-                        if (manager != null)
-                        {
-                            manager.RegenerateDungeon();
-                            Debug.Log("暗転後にマップ地形を再生成しました");
-                        }
-                        else
-                        {
-                            Debug.LogWarning("DungeonManagerが見つかりませんでした");
-                        }
-                    }) });
-                    return;
-                }
+                dungeonManager.RegenerateDungeon();
             }
-            // フェードが無い場合も必ずマップ再生成
-            DungeonManager manager2 = FindFirstObjectByType<DungeonManager>();
-            if (manager2 != null)
-            {
-                manager2.RegenerateDungeon();
-                Debug.Log("暗転後にマップ地形を再生成しました");
-            }
-            else
-            {
-                Debug.LogWarning("DungeonManagerが見つかりませんでした");
-            }
+            // 暗転や演出後にマップ地形再生成完了ログ
+            Debug.Log("暗転後にマップ地形を再生成しました");
+            // 必要ならここで演出やプレイヤー移動処理
         }
     }
 }
