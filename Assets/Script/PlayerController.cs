@@ -267,6 +267,11 @@ public class PlayerController : MonoBehaviour
         isChargingAttack = true;
     }
 
+    public void ComboAttackItem()
+    {
+        anim.SetBool("ComboAttack", true);
+    }
+
     private void SummonBoss()
     {
         if (summonedBossPrefab == null)
