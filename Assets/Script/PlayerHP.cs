@@ -28,6 +28,12 @@ public class PlayerHP : MonoBehaviour
     [Header("ハートUIのRectTransform")]
     public RectTransform heartUIRectTransform; // Inspectorで割り当て
 
+    [Header("デバフ設定")]
+    private bool isSlowed = false;              // スロー状態かどうか
+    private float slowDuration = 10f;           // スロー効果の持続時間
+    private float slowMultiplier = 0.5f;        // スピード減少倍率（50%に）
+    private Coroutine slowCoroutine;            // スローコルーチンの参照
+
     void Start()
     {
         currentHealth = maxHealth;
@@ -119,6 +125,61 @@ public class PlayerHP : MonoBehaviour
             Debug.Log("プレイヤーのHPが0になりました");
             // ゲームオーバー処理をここに追加可能
         }
+    }
+
+    /// <summary>
+    /// プレイヤーにスピード減少デバフを適用
+    /// </summary>
+    public void ApplySlowDebuff(float duration, float multiplier)
+    {
+        // 既にスローコルーチンが動いている場合は停止
+        if (slowCoroutine != null)
+        {
+            StopCoroutine(slowCoroutine);
+        }
+
+        slowDuration = duration;
+        slowMultiplier = multiplier;
+        slowCoroutine = StartCoroutine(SlowDebuffCoroutine());
+    }
+
+    private IEnumerator SlowDebuffCoroutine()
+    {
+        if (isSlowed)
+        {
+            // 既にスロー中の場合は一旦元に戻す
+            RestoreNormalSpeed();
+        }
+
+        isSlowed = true;
+
+        // PlayerControllerを取得してスピードを減少
+        PlayerController playerController = GetComponent<PlayerController>();
+        if (playerController != null)
+        {
+            playerController.ApplySpeedMultiplier(slowMultiplier);
+            Debug.Log($"スピード減少デバフ適用: {slowDuration}秒間、速度が{(1 - slowMultiplier) * 100}%減少");
+        }
+
+        // 持続時間待機
+        yield return new WaitForSeconds(slowDuration);
+
+        // 元の速度に戻す
+        RestoreNormalSpeed();
+    }
+
+    private void RestoreNormalSpeed()
+    {
+        if (!isSlowed) return;
+
+        PlayerController playerController = GetComponent<PlayerController>();
+        if (playerController != null)
+        {
+            playerController.ApplySpeedMultiplier(1f);
+            Debug.Log("スピード減少デバフが解除されました");
+        }
+
+        isSlowed = false;
     }
 
     public void MaxHP()
@@ -235,6 +296,10 @@ public class PlayerHP : MonoBehaviour
         if (blinkCoroutine != null)
         {
             StopCoroutine(blinkCoroutine);
+        }
+        if (slowCoroutine != null)
+        {
+            StopCoroutine(slowCoroutine);
         }
     }
 
