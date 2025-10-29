@@ -58,6 +58,8 @@ public class PlayerController : MonoBehaviour
 
     private InputSystem_Actions inputActions;
 
+    private float speedMultiplier = 1f;  // スピード倍率（デバフ用）
+
     void Awake()
     {
         inputActions = new InputSystem_Actions();
@@ -367,7 +369,7 @@ public class PlayerController : MonoBehaviour
         float animSpeed = moveDirection.magnitude;
         anim.SetFloat("speed", isDashing ? animSpeed * 2.0f : animSpeed);
 
-        controller.Move(moveDirection * currentSpeed * Time.deltaTime);
+        controller.Move(moveDirection * currentSpeed * speedMultiplier * Time.deltaTime);
     }
 
     private void HandleGravity()
@@ -391,5 +393,13 @@ public class PlayerController : MonoBehaviour
             elapsedTime += Time.deltaTime;
             yield return null;
         }
+    }
+
+    /// <summary>
+    /// スピード倍率を設定（デバフ用）
+    /// </summary>
+    public void ApplySpeedMultiplier(float multiplier)
+    {
+        speedMultiplier = multiplier;
     }
 }

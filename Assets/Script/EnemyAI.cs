@@ -116,7 +116,9 @@ public class EnemyAI : MonoBehaviour
         health -= damage;
         OnHealthChanged?.Invoke(health);
         Debug.Log(gameObject.name + " の残り体力: " + health);
-        if (knockbackCoroutine == null)
+
+        // ノックバック処理（NavMeshAgentが存在し、かつ有効な場合のみ）
+        if (agent != null && knockbackCoroutine == null)
         {
             knockbackCoroutine = StartCoroutine(Knockback(attacker));
         }
@@ -130,6 +132,12 @@ public class EnemyAI : MonoBehaviour
 
     protected IEnumerator Knockback(Transform attacker)
     {
+        // NavMeshAgentが存在しない、または無効な場合は何もしない
+        if (agent == null)
+        {
+            yield break;
+        }
+
         // AIの移動を一時的に停止
         if (agent.isActiveAndEnabled)
         {
@@ -148,19 +156,19 @@ public class EnemyAI : MonoBehaviour
         rb.linearVelocity = Vector3.zero;
         rb.AddForce(direction * knockbackForce, ForceMode.Impulse);
 
-
         // ノックバック時間待機
         yield return new WaitForSeconds(knockbackDuration);
 
         // Rigidbodyの物理演算を停止し、速度をゼロにする
         rb.linearVelocity = Vector3.zero;
         rb.isKinematic = true;
-        // AIの移動を再開
-        agent.enabled = true;
-        if (agent.isOnNavMesh)
+
+        // NavMeshAgentが存在し、かつ有効な場合のみ再開
+        if (agent != null && agent.isOnNavMesh)
         {
             agent.isStopped = false;
         }
+
         knockbackCoroutine = null; // コルーチンが終了したことを示す
     }
 
