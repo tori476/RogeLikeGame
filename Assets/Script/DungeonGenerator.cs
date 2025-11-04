@@ -48,43 +48,67 @@ public class DungeonManager : MonoBehaviour
 
     public void RegenerateDungeon()
     {
+        Debug.Log("=== RegenerateDungeon開始 ===");
+
         // 既存の部屋・階段を全て削除
         foreach (var room in spawnedRooms)
         {
-            if (room != null) Destroy(room);
+            if (room != null)
+            {
+                Destroy(room);
+            }
         }
         spawnedRooms.Clear();
         spawnedRoomBounds.Clear();
         availableConnectors.Clear();
         usedConnectorPositions.Clear();
+
         // 階段も全て削除
         foreach (var stairs in GameObject.FindGameObjectsWithTag("Stairs"))
         {
             Destroy(stairs);
         }
+
+        Debug.Log("古いダンジョンを削除しました");
+
         // NavMeshSurface再取得
         navMeshSurface = GetComponent<NavMeshSurface>();
+
         // 新しくダンジョン生成
+        Debug.Log("新しいダンジョンを生成します...");
         GenerateDungeon();
+        Debug.Log("ダンジョン生成完了");
+
         // NavMesh再構築
         if (navMeshSurface != null)
         {
+            Debug.Log("NavMesh再構築中...");
             navMeshSurface.BuildNavMesh();
+            Debug.Log("NavMesh再構築完了");
         }
+
         // NavMeshAgentを全ての部屋で有効化
         foreach (var room in spawnedRooms)
         {
-            var navAgents = room.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>(true);
-            foreach (var agent in navAgents)
+            if (room != null)
             {
-                agent.enabled = true;
+                var agents = room.GetComponentsInChildren<NavMeshAgent>(true);
+                foreach (var agent in agents)
+                {
+                    if (agent != null)
+                    {
+                        agent.enabled = true;
+                    }
+                }
             }
         }
+
         // プレイヤーをspawnedRooms[0]（スタート部屋）のNavMesh上に移動
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null && spawnedRooms.Count > 0)
         {
             Vector3 startPos = new Vector3(0f, 10f, 0f);
+            Debug.Log($"プレイヤーを{startPos}に移動します");
 
             // CharacterControllerの座標リセット対応
             var controller = player.GetComponent<CharacterController>();
@@ -104,7 +128,15 @@ public class DungeonManager : MonoBehaviour
             {
                 pc.ResetVelocity();
             }
+
+            Debug.Log("プレイヤーの移動完了");
         }
+        else
+        {
+            Debug.LogWarning("プレイヤーが見つからないか、部屋が生成されていません");
+        }
+
+        Debug.Log("=== RegenerateDungeon完了 ===");
     }
 
     private void GenerateDungeon()
