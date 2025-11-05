@@ -46,6 +46,7 @@ public class DungeonManager : MonoBehaviour
         }
     }
 
+    // publicにしてSceneTransitionManagerから呼び出せるようにする
     public void RegenerateDungeon()
     {
         Debug.Log("=== RegenerateDungeon開始 ===");

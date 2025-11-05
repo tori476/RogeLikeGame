@@ -1,0 +1,153 @@
+using UnityEngine;
+using UnityEngine.UI;
+using System.Collections;
+
+public class SceneTransitionManager : MonoBehaviour
+{
+    public static SceneTransitionManager Instance { get; private set; }
+
+    [Header("暗転設定")]
+    public Image fadeImage; // 暗転用の黒い画像
+    public float fadeDuration = 1.0f; // 暗転にかかる時間（秒）
+
+    private void Awake()
+    {
+        // シングルトンパターン
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        // 暗転用の画像を作成（Canvasがない場合）
+        if (fadeImage == null)
+        {
+            CreateFadeCanvas();
+        }
+    }
+
+    private void CreateFadeCanvas()
+    {
+        // Canvas作成
+        GameObject canvasObj = new GameObject("FadeCanvas");
+        Canvas canvas = canvasObj.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 9999; // 最前面に表示
+        canvasObj.AddComponent<CanvasScaler>();
+        canvasObj.AddComponent<GraphicRaycaster>();
+        canvasObj.transform.SetParent(transform);
+
+        // 黒い画像を作成
+        GameObject imageObj = new GameObject("FadeImage");
+        imageObj.transform.SetParent(canvasObj.transform, false);
+        fadeImage = imageObj.AddComponent<Image>();
+        fadeImage.color = new Color(0, 0, 0, 0); // 最初は透明
+        fadeImage.raycastTarget = false;
+
+        // 画面全体を覆うように設定
+        RectTransform rectTransform = fadeImage.GetComponent<RectTransform>();
+        rectTransform.anchorMin = Vector2.zero;
+        rectTransform.anchorMax = Vector2.one;
+        rectTransform.sizeDelta = Vector2.zero;
+    }
+
+    // 次のフロアに進むための暗転処理
+    public void TransitionToNextFloor()
+    {
+        StartCoroutine(TransitionCoroutine());
+    }
+
+    private IEnumerator TransitionCoroutine()
+    {
+        Debug.Log("=== TransitionCoroutine 開始 ===");
+        
+        // フェードアウト（暗転）
+        Debug.Log("フェードアウト開始");
+        yield return StartCoroutine(FadeOut());
+        Debug.Log("フェードアウト完了");
+
+        // ここで次のフロアの生成処理を呼び出す
+        DungeonManager dungeonManager = FindFirstObjectByType<DungeonManager>();
+        if (dungeonManager != null)
+        {
+            Debug.Log("DungeonManagerを発見、ダンジョン再生成開始");
+            dungeonManager.RegenerateDungeon();
+            Debug.Log("ダンジョン再生成完了");
+        }
+        else
+        {
+            Debug.LogError("DungeonManagerが見つかりません！");
+        }
+
+        // 階層表示を更新
+        FloorUIController floorUI = FindFirstObjectByType<FloorUIController>();
+        if (floorUI != null)
+        {
+            floorUI.IncreaseFloor();
+            Debug.Log($"階層を1つ上げました。現在: {floorUI.GetCurrentFloor()}F");
+        }
+        else
+        {
+            Debug.LogWarning("FloorUIControllerが見つかりません！階層表示を更新できませんでした。");
+        }
+
+        // プレイヤーをスタート地点に移動
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            player.transform.position = new Vector3(0, 10, 0);
+        }
+
+        // 少し待機
+        Debug.Log("待機中...");
+        yield return new WaitForSeconds(0.5f);
+
+        // フェードイン（明転）
+        Debug.Log("フェードイン開始");
+        yield return StartCoroutine(FadeIn());
+        Debug.Log("フェードイン完了");
+        
+        Debug.Log("=== TransitionCoroutine 完了 ===");
+    }
+
+    // 暗転（フェードアウト）
+    private IEnumerator FadeOut()
+    {
+        float elapsedTime = 0f;
+        Color color = fadeImage.color;
+
+        while (elapsedTime < fadeDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            color.a = Mathf.Clamp01(elapsedTime / fadeDuration);
+            fadeImage.color = color;
+            yield return null;
+        }
+
+        color.a = 1f;
+        fadeImage.color = color;
+    }
+
+    // 明転（フェードイン）
+    private IEnumerator FadeIn()
+    {
+        float elapsedTime = 0f;
+        Color color = fadeImage.color;
+
+        while (elapsedTime < fadeDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            color.a = Mathf.Clamp01(1f - (elapsedTime / fadeDuration));
+            fadeImage.color = color;
+            yield return null;
+        }
+
+        color.a = 0f;
+        fadeImage.color = color;
+    }
+}

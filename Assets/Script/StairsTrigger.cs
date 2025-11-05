@@ -16,7 +16,16 @@ public class StairsTrigger : MonoBehaviour
         {
             isTriggered = true;
             Debug.Log("階段に触れました。次の階層へ移動します...");
-            StartCoroutine(GoToNextFloor());
+
+            // SceneTransitionManagerを使って暗転処理を開始
+            if (SceneTransitionManager.Instance != null)
+            {
+                SceneTransitionManager.Instance.TransitionToNextFloor();
+            }
+            else
+            {
+                Debug.LogError("SceneTransitionManagerが見つかりません！");
+            }
         }
     }
 
