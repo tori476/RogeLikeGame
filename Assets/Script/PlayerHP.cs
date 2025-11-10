@@ -123,7 +123,8 @@ public class PlayerHP : MonoBehaviour
         if (currentHealth <= 0)
         {
             Debug.Log("プレイヤーのHPが0になりました");
-            // ゲームオーバー処理をここに追加可能
+            // ゲームオーバー処理
+            GameOverManager.Instance.TriggerGameOver();
         }
     }
 
