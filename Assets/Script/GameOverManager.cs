@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement; // シーン遷移に必要
 using TMPro;
 using System.Collections;
 
@@ -9,9 +10,12 @@ public class GameOverManager : MonoBehaviour
 
     [Header("UI設定")]
     public Image fadeImage;              // 暗転用の黒い画像
-    public TextMeshProUGUI gameOverText; // 「GAME OVER」テキスト
+    public TextMeshProUGUI gameOverText; // 「GAME OVER」テキスト (Inspectorで割り当て)
     public float fadeDuration = 1.5f;    // 暗転にかかる時間（秒）
     public float textAppearDelay = 1.0f; // テキスト表示までの遅延時間
+
+    [Header("シーン遷移設定")]
+    public float resultSceneDelay = 3.0f; // ゲームオーバー画面表示後、Resultシーンへ遷移するまでの時間（秒）
 
     private bool hasTriggered = false;   // 重複実行防止フラグ
 
@@ -34,18 +38,12 @@ public class GameOverManager : MonoBehaviour
         {
             CreateFadeCanvas();
         }
-
-        // テキストが存在しない場合は作成
-        if (gameOverText == null)
-        {
-            CreateGameOverText();
-        }
     }
 
     private void CreateFadeCanvas()
     {
         // Canvas作成
-        GameObject canvasObj = new GameObject("GameOverCanvas");
+        GameObject canvasObj = new GameObject("GameOverFadeCanvas");
         Canvas canvas = canvasObj.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         canvas.sortingOrder = 9998; // SceneTransitionManagerより手前
@@ -62,34 +60,6 @@ public class GameOverManager : MonoBehaviour
 
         // 画面全体を覆うように設定
         RectTransform rectTransform = fadeImage.GetComponent<RectTransform>();
-        rectTransform.anchorMin = Vector2.zero;
-        rectTransform.anchorMax = Vector2.one;
-        rectTransform.sizeDelta = Vector2.zero;
-    }
-
-    private void CreateGameOverText()
-    {
-        // Canvas作成（テキスト用）
-        GameObject canvasObj = new GameObject("GameOverTextCanvas");
-        Canvas canvas = canvasObj.AddComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 9999; // 最前面
-        canvasObj.AddComponent<CanvasScaler>();
-        canvasObj.transform.SetParent(transform);
-
-        // TextMeshProオブジェクト作成
-        GameObject textObj = new GameObject("GameOverText");
-        textObj.transform.SetParent(canvasObj.transform, false);
-        gameOverText = textObj.AddComponent<TextMeshProUGUI>();
-
-        // テキスト設定
-        gameOverText.text = "GAME OVER";
-        gameOverText.fontSize = 100;
-        gameOverText.alignment = TextAlignmentOptions.Center;
-        gameOverText.color = new Color(1, 0, 0, 0); // 最初は透明
-
-        // RectTransform設定
-        RectTransform rectTransform = textObj.GetComponent<RectTransform>();
         rectTransform.anchorMin = Vector2.zero;
         rectTransform.anchorMax = Vector2.one;
         rectTransform.sizeDelta = Vector2.zero;
@@ -116,8 +86,16 @@ public class GameOverManager : MonoBehaviour
         // --- フェーズ2: テキスト表示 ---
         yield return StartCoroutine(FadeInGameOverText());
 
-        // ここでリスタートボタンなどを表示する処理を追加可能
         Debug.Log("ゲームオーバー画面を表示中");
+
+        // --- フェーズ3: Resultシーンへ遷移 ---
+        yield return new WaitForSecondsRealtime(resultSceneDelay);
+        
+        // 時間の流れを戻す
+        Time.timeScale = 1f;
+        
+        // Resultシーンへ遷移
+        SceneManager.LoadScene("Result");
     }
 
     private IEnumerator FadeToBlack()
@@ -127,7 +105,7 @@ public class GameOverManager : MonoBehaviour
 
         while (elapsedTime < fadeDuration)
         {
-            elapsedTime += Time.unscaledDeltaTime; // Time.scaleに影響されないようにする
+            elapsedTime += Time.unscaledDeltaTime;
             color.a = Mathf.Clamp01(elapsedTime / fadeDuration);
             fadeImage.color = color;
             yield return null;
@@ -139,6 +117,13 @@ public class GameOverManager : MonoBehaviour
 
     private IEnumerator FadeInGameOverText()
     {
+        // テキストが設定されていない場合は処理をスキップ
+        if (gameOverText == null)
+        {
+            Debug.LogWarning("GameOverTextがInspectorで設定されていません");
+            yield break;
+        }
+
         // テキスト表示までの遅延
         yield return new WaitForSecondsRealtime(textAppearDelay);
 
