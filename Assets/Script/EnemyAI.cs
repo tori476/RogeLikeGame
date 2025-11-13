@@ -13,7 +13,7 @@ public class EnemyAI : MonoBehaviour
     public float attackRange = 2.0f;    // 攻撃を開始するプレイヤーとの距離
     public float attackCooldown = 1.5f; // 攻撃後の待ち時間（秒）
     public int attackDamage = 1;        // 敵の攻撃力を1に固定
-    private float lastAttackTime = 0f;  // 最後に攻撃した時間
+    protected float lastAttackTime = 0f;  // 最後に攻撃した時間（protected に変更）
 
     [Header("ドロップアイテム設定")]
     public GameObject heartPrefab;      // ハートのプレハブをインスペクターから設定
