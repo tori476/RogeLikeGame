@@ -2718,7 +2718,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DungeonGenerator
   startRoomPrefab: {fileID: 4479279867502507703, guid: 8c35d2860f5e84027a13566c35b56a74, type: 3}
-  endRoomPrefab: {fileID: 5066933235728734100, guid: adbb32665910a41a7887d9fbd5f04fb2, type: 3}
+  endRoomPrefabsByFloor:
+  - {fileID: 5066933235728734100, guid: adbb32665910a41a7887d9fbd5f04fb2, type: 3}
+  - {fileID: 5066933235728734100, guid: 324513bf1cb309640a27c2503d1c0674, type: 3}
+  - {fileID: 5066933235728734100, guid: f68b673ccc0fafc40aa88b3b57ce8aa6, type: 3}
+  defaultEndRoomPrefab: {fileID: 0}
   treasureRoomPrefab: {fileID: 3922710928792911927, guid: 13ed862a0b6f04a4680ba87d15fbb92b, type: 3}
   normalRoomPrefabs:
   - {fileID: 103996237100713169, guid: 56b9a6e8f970743cda2c4bc3b1113f9b, type: 3}

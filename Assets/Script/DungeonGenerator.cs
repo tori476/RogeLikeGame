@@ -9,7 +9,12 @@ public class DungeonManager : MonoBehaviour
     [Header("部屋のプレハブ")]
 
     public GameObject startRoomPrefab; // スタート部屋専用
-    public GameObject endRoomPrefab;   // エンド部屋（ボス部屋）専用
+
+    [Header("階層別エンド部屋設定")]
+    [Tooltip("階層ごとに使用するEndRoomプレハブのリスト。インデックス0が1階、1が2階...")]
+    public GameObject[] endRoomPrefabsByFloor; // 階層別のエンド部屋配列
+    public GameObject defaultEndRoomPrefab;    // デフォルトのエンド部屋（階層数を超えた場合用）
+
     public GameObject treasureRoomPrefab;//宝箱部屋専用
     public GameObject[] normalRoomPrefabs;
 
@@ -145,7 +150,7 @@ public class DungeonManager : MonoBehaviour
         // --- 1. スタート部屋の配置 ---
         if (startRoomPrefab == null)
         {
-            Debug.LogError("スタート部屋が設定されていません！");
+            Debug.LogError("スタート部屋が設定されていません!");
             return;
         }
         GameObject startRoom = Instantiate(startRoomPrefab, Vector3.zero, Quaternion.identity);
@@ -175,9 +180,14 @@ public class DungeonManager : MonoBehaviour
         }
 
         // --- 4. エンド部屋の配置 ---
-        if (endRoomPrefab != null)
+        GameObject selectedEndRoom = GetEndRoomForCurrentFloor();
+        if (selectedEndRoom != null)
         {
-            PlaceEndRoom();
+            PlaceEndRoom(selectedEndRoom);
+        }
+        else
+        {
+            Debug.LogError("使用するエンド部屋プレハブが見つかりません!");
         }
 
         // 生成結果のログ表示
@@ -191,6 +201,58 @@ public class DungeonManager : MonoBehaviour
         if (navMeshSurface != null)
         {
             navMeshSurface.BuildNavMesh();
+        }
+    }
+
+    /// <summary>
+    /// 現在の階層に応じたEndRoomプレハブを取得
+    /// </summary>
+    private GameObject GetEndRoomForCurrentFloor()
+    {
+        // FloorUIControllerから現在の階層を取得
+        FloorUIController floorUI = FindFirstObjectByType<FloorUIController>();
+        int currentFloor = 1;
+
+        if (floorUI != null)
+        {
+            currentFloor = floorUI.GetCurrentFloor();
+            Debug.Log($"<color=cyan>【EndRoom選択】現在の階層: {currentFloor}階</color>");
+        }
+        else
+        {
+            Debug.LogWarning("<color=yellow>FloorUIControllerが見つかりません。1階として扱います。</color>");
+        }
+
+        // 配列のインデックスは0から始まるため、階層-1
+        int floorIndex = currentFloor - 1;
+
+        // デバッグ情報を詳細に表示
+        Debug.Log($"<color=cyan>【EndRoom選択】floorIndex: {floorIndex}, 配列サイズ: {(endRoomPrefabsByFloor != null ? endRoomPrefabsByFloor.Length : 0)}</color>");
+
+        // 階層に対応するプレハブが存在するかチェック
+        if (endRoomPrefabsByFloor != null && 
+            floorIndex >= 0 && 
+            floorIndex < endRoomPrefabsByFloor.Length && 
+            endRoomPrefabsByFloor[floorIndex] != null)
+        {
+            Debug.Log($"<color=green>【EndRoom選択】{currentFloor}階用のEndRoomを使用: {endRoomPrefabsByFloor[floorIndex].name}</color>");
+            return endRoomPrefabsByFloor[floorIndex];
+        }
+        else
+        {
+            // 配列外または未設定の場合はデフォルトを使用
+            string reason = "";
+            if (endRoomPrefabsByFloor == null)
+                reason = "配列がnull";
+            else if (floorIndex < 0)
+                reason = $"インデックスが負の値({floorIndex})";
+            else if (floorIndex >= endRoomPrefabsByFloor.Length)
+                reason = $"インデックス({floorIndex})が配列サイズ({endRoomPrefabsByFloor.Length})を超過";
+            else if (endRoomPrefabsByFloor[floorIndex] == null)
+                reason = $"Element {floorIndex} がnull";
+
+            Debug.Log($"<color=yellow>【EndRoom選択】{currentFloor}階用の専用EndRoomが使えません({reason})。デフォルトを使用: {(defaultEndRoomPrefab != null ? defaultEndRoomPrefab.name : "null")}</color>");
+            return defaultEndRoomPrefab;
         }
     }
 
@@ -248,9 +310,15 @@ public class DungeonManager : MonoBehaviour
         return room.GetComponentsInChildren<Transform>().Where(t => t.name == "Connector").ToArray();
     }
 
-    // エンド部屋を配置する専用メソッド
-    private void PlaceEndRoom()
+    // エンド部屋を配置する専用メソッド（引数でプレハブを受け取るように変更）
+    private void PlaceEndRoom(GameObject endRoomPrefab)
     {
+        if (endRoomPrefab == null)
+        {
+            Debug.LogError("EndRoomプレハブがnullです!");
+            return;
+        }
+
         // 1. スタート地点から最も遠いコネクターを探す
         Transform furthestConnector = null;
         float maxDistance = 0f;

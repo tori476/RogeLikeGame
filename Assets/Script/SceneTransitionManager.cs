@@ -71,7 +71,19 @@ public class SceneTransitionManager : MonoBehaviour
         yield return StartCoroutine(FadeOut());
         Debug.Log("フェードアウト完了");
 
-        // ここで次のフロアの生成処理を呼び出す
+        // ★★★ 修正: 階層を先に増やす ★★★
+        FloorUIController floorUI = FindFirstObjectByType<FloorUIController>();
+        if (floorUI != null)
+        {
+            floorUI.IncreaseFloor();
+            Debug.Log($"<color=yellow>【階層更新】階層を1つ上げました。現在: {floorUI.GetCurrentFloor()}F</color>");
+        }
+        else
+        {
+            Debug.LogWarning("FloorUIControllerが見つかりません！階層表示を更新できませんでした。");
+        }
+
+        // ★★★ その後でダンジョン再生成 ★★★
         DungeonManager dungeonManager = FindFirstObjectByType<DungeonManager>();
         if (dungeonManager != null)
         {
@@ -82,18 +94,6 @@ public class SceneTransitionManager : MonoBehaviour
         else
         {
             Debug.LogError("DungeonManagerが見つかりません！");
-        }
-
-        // 階層表示を更新
-        FloorUIController floorUI = FindFirstObjectByType<FloorUIController>();
-        if (floorUI != null)
-        {
-            floorUI.IncreaseFloor();
-            Debug.Log($"階層を1つ上げました。現在: {floorUI.GetCurrentFloor()}F");
-        }
-        else
-        {
-            Debug.LogWarning("FloorUIControllerが見つかりません！階層表示を更新できませんでした。");
         }
 
         // プレイヤーをスタート地点に移動
