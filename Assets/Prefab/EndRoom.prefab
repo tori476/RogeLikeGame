@@ -3760,6 +3760,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: FlyScorpion
       objectReference: {fileID: 0}
+    - target: {fileID: 3815738380161701957, guid: 589bb3a65e08446209aa4b06d78dd1fd, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4271457951336230443, guid: 589bb3a65e08446209aa4b06d78dd1fd, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
