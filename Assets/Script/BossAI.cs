@@ -302,7 +302,7 @@ public class BossAI : EnemyAI
         Debug.Log(gameObject.name + " は倒された！");
         if (bossSummonItemPrefab != null)
         {
-            Instantiate(bossSummonItemPrefab, transform.position, Quaternion.identity);
+            Instantiate(bossSummonItemPrefab, new Vector3(transform.position.x, transform.position.y + 1, transform.position.z), Quaternion.identity);
             Debug.Log(gameObject.name + " が召喚アイテムをドロップしました！");
         }
         // 階段生成処理（EndRoomの中心に生成）
