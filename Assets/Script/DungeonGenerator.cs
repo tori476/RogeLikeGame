@@ -200,7 +200,8 @@ public class DungeonManager : MonoBehaviour
         // NavMesh構築（フレーム遅延不要、即時構築）
         if (navMeshSurface != null)
         {
-            navMeshSurface.BuildNavMesh();
+            StartCoroutine(BuildNavMeshDelayed());
+            //navMeshSurface.BuildNavMesh();
         }
     }
 
@@ -230,9 +231,9 @@ public class DungeonManager : MonoBehaviour
         Debug.Log($"<color=cyan>【EndRoom選択】floorIndex: {floorIndex}, 配列サイズ: {(endRoomPrefabsByFloor != null ? endRoomPrefabsByFloor.Length : 0)}</color>");
 
         // 階層に対応するプレハブが存在するかチェック
-        if (endRoomPrefabsByFloor != null && 
-            floorIndex >= 0 && 
-            floorIndex < endRoomPrefabsByFloor.Length && 
+        if (endRoomPrefabsByFloor != null &&
+            floorIndex >= 0 &&
+            floorIndex < endRoomPrefabsByFloor.Length &&
             endRoomPrefabsByFloor[floorIndex] != null)
         {
             Debug.Log($"<color=green>【EndRoom選択】{currentFloor}階用のEndRoomを使用: {endRoomPrefabsByFloor[floorIndex].name}</color>");
@@ -441,11 +442,12 @@ public class DungeonManager : MonoBehaviour
             }
         }
 
+
         // NavMesh再構築（部屋追加直後）
-        if (navMeshSurface != null)
+        /*if (navMeshSurface != null)
         {
             navMeshSurface.BuildNavMesh();
-        }
+        }*/
         // NavMeshAgentを有効化
         navAgents = newItem.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>(true);
         foreach (var agent in navAgents)
@@ -544,7 +546,7 @@ public class DungeonManager : MonoBehaviour
     private System.Collections.IEnumerator BuildNavMeshDelayed()
     {
         // 1フレーム待機して、すべてのオブジェクトが確実に配置されるのを待つ
-        yield return null;
+        yield return new WaitForSeconds(0.1f);
         navMeshSurface.BuildNavMesh();
         // NavMeshAgentを有効化
         foreach (var room in spawnedRooms)
