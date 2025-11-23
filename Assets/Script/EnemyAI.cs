@@ -164,9 +164,10 @@ public class EnemyAI : MonoBehaviour
         rb.isKinematic = true;
 
         // NavMeshAgentが存在し、かつ有効な場合のみ再開
-        if (agent != null && agent.isOnNavMesh)
+        if (agent != null)// && agent.isOnNavMesh
         {
             agent.isStopped = false;
+            agent.enabled = true;
         }
 
         knockbackCoroutine = null; // コルーチンが終了したことを示す
