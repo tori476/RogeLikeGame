@@ -3,33 +3,31 @@ using System.Collections;
 
 public class BossAI_Orc : BossAI
 {
-    [Header("ドラゴンの固有の設定")]
-    public float flameAttackCooldown = 3.0f;
+    [Header("オーク固有の設定: 範囲攻撃(スマッシュ)")]
+    public float smashCooldown = 5.0f;
+    public int smashDamage = 25;
+    public float smashRadius = 5.0f; // 攻撃範囲の半径
+    public GameObject smashEffectPrefab; // 地面を叩きつけた時のエフェクト
 
-    public int flameDamage = 10;
+    public GameObject smashPosition; // エフェクトを出す場所
 
-    [Header("炎攻撃のエフェクト設定（追加部分）")]
-    public GameObject flameEffectPrefab; // 炎のパーティクル（ループ再生するもの）
-    public Transform flameSpawnPoint;    // 頭（口元）に作成した空オブジェクト
-    private GameObject currentFlameInstance; // 生成中の炎インスタンス保持用
-
-    [Header("攻撃範囲の角度制限")]
+    [Header("通常攻撃の角度制限")]
     [Range(0, 180)]
-    public float attackAngle = 45.0f; // 前方中心から左右に何度まで許容するか（45なら合計90度の扇形）
+    public float attackAngle = 45.0f; // 前方中心から左右に何度まで許容するか
 
-    [Header("突進スキル")]
+    [Header("突進スキル (タックル)")]
     public float chargeRange = 15.0f;
-    public float chargePrepTime = 1.5f;
-    public float chargeSpeed = 20.0f;
-    public int chargeDamage = 40;
-    public float chargeCooldown = 5.0f;
-    public float chargeProbability = 0.5f;
+    public float chargePrepTime = 1.0f; // オークは予備動作短め
+    public float chargeSpeed = 15.0f;
+    public int chargeDamage = 30;
+    public float chargeCooldown = 8.0f;
+    public float chargeProbability = 0.4f; // 突進確率
     public GameObject chargeIndicatorPrefab;
-    public float chargeImpactRadius = 2.5f;
+    public float chargeImpactRadius = 2.0f;
 
-    // ステートマシンはこのクラス専用にする
-    private enum DragonState { Chasing, Attacking, PreparingCharge, Charging, Cooldown }
-    private DragonState currentState = DragonState.Chasing;
+    // ステートマシン
+    private enum OrcState { Chasing, Attacking, PreparingCharge, Charging, Cooldown }
+    private OrcState currentState = OrcState.Chasing;
 
     private Animator anim;
     private Vector3 chargeTargetPos;
@@ -37,50 +35,40 @@ public class BossAI_Orc : BossAI
 
     protected override void Start()
     {
-        base.Start(); // BossAI (と EnemyAI) のStartを呼ぶ
+        base.Start();
         anim = GetComponent<Animator>();
-        currentState = DragonState.Chasing;
+        currentState = OrcState.Chasing;
     }
 
-    // BossAI で定義した HandleBehavior をここで上書きして、独自の行動を書く
     protected override void HandleBehavior()
     {
-
         UpdateMoveAnimation();
 
-        // 常にプレイヤーの方を向く（突進中以外）
-        if (currentState == DragonState.Chasing)
+        // 突進中以外はプレイヤーの方を向く
+        if (currentState == OrcState.Chasing)
         {
             LookAtPlayer();
         }
 
         switch (currentState)
         {
-            case DragonState.Chasing:
+            case OrcState.Chasing:
                 ProcessChasing();
                 break;
-            case DragonState.Charging:
+            case OrcState.Charging:
                 ProcessCharging();
                 break;
-                // 他のステートはコルーチンで制御しているのでここでは何もしない
         }
     }
 
     private void UpdateMoveAnimation()
     {
         if (anim == null) return;
-
         float currentSpeed = 0f;
-
-        // NavMeshAgentが有効、かつNavMesh上にいる場合のみ速度を取得
         if (agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh)
         {
-            // 現在の速度（ベクトルの長さ）を取得
             currentSpeed = agent.velocity.magnitude;
         }
-
-        // Animatorのパラメータ "Speed" に値をセット
-        // 0.1f は減衰値（DampTime）で、急激な変化を滑らかにします
         anim.SetFloat("Speed", currentSpeed, 0.1f, Time.deltaTime);
     }
 
@@ -101,8 +89,8 @@ public class BossAI_Orc : BossAI
 
         float dist = Vector3.Distance(transform.position, player.position);
 
-        // 突進の判定
-        if (dist <= chargeRange)
+        // --- 1. 突進判定 (距離が離れている時) ---
+        if (dist <= chargeRange && dist > attackRange)
         {
             if (UnityEngine.Random.value < chargeProbability)
             {
@@ -111,96 +99,100 @@ public class BossAI_Orc : BossAI
             }
         }
 
-        // 通常攻撃の判定
+        // --- 2. 近距離攻撃判定 ---
         if (dist <= attackRange)
         {
-            Vector3 dirToPlayer = player.position - transform.position;
-            float angle = Vector3.Angle(transform.forward, dirToPlayer);
+            // 範囲攻撃（スマッシュ）は角度関係なく、距離が近ければ発動チャンスあり
+            // ただしランダム性を持たせる
+            bool trySmash = (UnityEngine.Random.value > 0.95f); // %の確率で範囲攻撃
 
-            // 射程内 かつ 指定角度内（正面）にいる時だけ攻撃モーションを始める
-            if (angle <= attackAngle)
+            if (trySmash)
             {
-                int rand = Random.Range(0, 2);
-                switch (rand)
-                {
-                    case 0:
-                        StartCoroutine(Routine_Attack());
-                        break;
-                    case 1:
-                        StartCoroutine(Routine_Flame_Attack());
-                        break;
-                }
+                StartCoroutine(Routine_Smash_Attack());
             }
             else
             {
-                // 近くにいるけど横や後ろにいる場合
-                // 素早く振り向く処理を入れると自然になります
-                // LookAtPlayer(); は常に呼ばれているので、自然と正面を向くまで待つことになります
+                // 通常攻撃は正面に捉えている必要がある
+                Vector3 dirToPlayer = player.position - transform.position;
+                float angle = Vector3.Angle(transform.forward, dirToPlayer);
+
+                if (angle <= attackAngle)
+                {
+                    StartCoroutine(Routine_Normal_Attack());
+                }
             }
         }
     }
 
     private void ProcessCharging()
     {
-        // NavMeshを使わず直接移動
+        // 突進移動処理
         transform.position = Vector3.MoveTowards(transform.position, chargeTargetPos, chargeSpeed * Time.deltaTime);
 
-        if (Vector3.Distance(transform.position, chargeTargetPos) < 0.5f)
+        // 目標地点付近、または衝突判定
+        float distToDest = Vector3.Distance(transform.position, chargeTargetPos);
+        float distToPlayer = Vector3.Distance(transform.position, player.position);
+
+        // プレイヤーにヒットしたか、目的地に着いた場合
+        if (distToPlayer <= chargeImpactRadius || distToDest < 0.5f)
         {
             // ヒット判定
-            float distToPlayer = Vector3.Distance(transform.position, player.position);
             if (distToPlayer <= chargeImpactRadius)
             {
                 player.GetComponent<PlayerHP>()?.TakeDamage(chargeDamage);
+                Debug.Log("オークのタックルがヒット！");
             }
 
-            agent.enabled = true; // 復帰
+            agent.enabled = true; // NavMeshAgent復帰
             StartCoroutine(Routine_Cooldown(chargeCooldown));
         }
     }
 
     // --- コルーチン群 ---
 
-    private IEnumerator Routine_Attack()
+    // 通常攻撃（武器を振るなど）
+    private IEnumerator Routine_Normal_Attack()
     {
-        currentState = DragonState.Attacking;
+        currentState = OrcState.Attacking;
         agent.isStopped = true;
-        anim.SetTrigger("Attack");
+        anim.SetTrigger("Attack"); // 通常攻撃アニメーション
 
-        yield return null;
-        // アニメーションイベントでダメージ判定を入れる想定(DealDamageToPlayerなど)
+        // アニメーションが終わるのを待つ簡易的な実装（またはイベント待ち）
+        // ここではアニメーションイベント(DealDamageToPlayer)が呼ばれるのを期待して
+        // 次の行動までの待機時間を入れる
+        yield return new WaitForSeconds(1.0f);
 
         StartCoroutine(Routine_Cooldown(attackCooldown));
     }
 
-    private IEnumerator Routine_Flame_Attack()
+    // 範囲攻撃（地面叩きつけ）
+    private IEnumerator Routine_Smash_Attack()
     {
-        currentState = DragonState.Attacking;
+        currentState = OrcState.Attacking;
         agent.isStopped = true;
-        anim.SetTrigger("FlameAttack");
+        anim.SetTrigger("SmashAttack"); // 範囲攻撃用アニメーションTrigger
 
-        yield return null;
-        // アニメーションイベントでダメージ判定を入れる想定(DealDamageToPlayerなど)
+        // アニメーションイベント ExecuteSmashAttack() が呼ばれるのを待つ
+        // 硬直時間は長めに設定
+        yield return new WaitForSeconds(1.5f);
 
-        StartCoroutine(Routine_Cooldown(flameAttackCooldown));
+        StartCoroutine(Routine_Cooldown(smashCooldown));
     }
 
+    // 突進準備
     private IEnumerator Routine_PrepareCharge()
     {
-        currentState = DragonState.PreparingCharge;
+        currentState = OrcState.PreparingCharge;
         agent.isStopped = true;
-        anim.SetTrigger("PrepareCharge");
+        anim.SetTrigger("PrepareCharge"); // 構え
 
         chargeTargetPos = player.position;
 
-        // インジケーター表示
+        // 突進ラインの表示
         if (chargeIndicatorPrefab != null)
         {
-            // 表示位置
             Vector3 pos = new Vector3(chargeTargetPos.x, transform.position.y + 0.1f, chargeTargetPos.z);
-
             currentIndicator = Instantiate(chargeIndicatorPrefab, pos, Quaternion.identity);
-
             float diameter = chargeImpactRadius * 2;
             currentIndicator.transform.localScale = new Vector3(diameter, 0.1f, diameter);
         }
@@ -209,92 +201,65 @@ public class BossAI_Orc : BossAI
 
         if (currentIndicator != null) Destroy(currentIndicator);
 
-        currentState = DragonState.Charging;
-        anim.SetTrigger("Charge");
-        agent.enabled = false; // 物理移動のためオフに
+        currentState = OrcState.Charging;
+        anim.SetTrigger("Charge"); // 突進モーション
+        agent.enabled = false; // 物理移動のためAgentオフ
     }
 
     private IEnumerator Routine_Cooldown(float time)
     {
-        currentState = DragonState.Cooldown;
+        currentState = OrcState.Cooldown;
         yield return new WaitForSeconds(time);
-        currentState = DragonState.Chasing;
+        currentState = OrcState.Chasing;
     }
 
-    // アニメーションイベントから呼ばれる
+    // --- Animation Events (Unityのエディタ側で設定する関数) ---
+
+    /// <summary>
+    /// 通常攻撃のアニメーションイベント
+    /// 攻撃が当たる瞬間に呼ぶ
+    /// </summary>
     public void DealDamageToPlayer()
     {
         if (player == null) return;
 
-        // 1. 距離の判定
         Vector3 dirToPlayer = player.position - transform.position;
         float distance = dirToPlayer.magnitude;
 
         if (distance <= attackRange)
         {
-            // 2. 角度の判定 (扇形)
-            // ボスの正面と、プレイヤーへの方向ベクトルの角度差を取得
             float angle = Vector3.Angle(transform.forward, dirToPlayer);
-
-            // 指定した角度以内（例: 正面から45度以内）ならヒット
             if (angle <= attackAngle)
             {
                 player.GetComponent<PlayerHP>()?.TakeDamage(attackDamage);
-                Debug.Log("前方攻撃ヒット！");
-            }
-            else
-            {
-                Debug.Log("距離は近いが、正面にいないためミス");
+                Debug.Log("オークの通常攻撃ヒット！");
             }
         }
     }
 
-
-    /// アニメーションイベント：炎攻撃の「開始」タイミングで呼ぶ
-    public void StartFlameBreath()
+    /// <summary>
+    /// 範囲攻撃（スマッシュ）のアニメーションイベント
+    /// 武器が地面に叩きつけられた瞬間に呼ぶ
+    /// </summary>
+    public void ExecuteSmashAttack()
     {
-        if (flameEffectPrefab != null && flameSpawnPoint != null)
+        // エフェクト生成
+        if (smashEffectPrefab != null)
         {
-            // すでに炎が出ていれば一度消す（念のため）
-            if (currentFlameInstance != null) Destroy(currentFlameInstance);
-
-            // 炎を生成
-            currentFlameInstance = Instantiate(flameEffectPrefab, flameSpawnPoint.position, flameSpawnPoint.rotation);
-
-            // 頭（口）の動きに追従させるために親子関係を設定
-            currentFlameInstance.transform.SetParent(flameSpawnPoint);
-
-            FlameDamageCollider flameScript = currentFlameInstance.GetComponent<FlameDamageCollider>();
-            if (flameScript != null)
-            {
-                flameScript.damage = flameDamage;
-            }
+            Instantiate(smashEffectPrefab, smashPosition.transform.position, Quaternion.identity);
         }
-    }
-    /// アニメーションイベント：炎攻撃の「終了」タイミングで呼ぶ
-    public void EndFlameBreath()
-    {
-        if (currentFlameInstance != null)
+
+        // 範囲ダメージ判定 (自分中心の円形範囲)
+        if (player != null)
         {
-            // 1. いきなりDestroyせず、まずはParticleSystemを取得
-            ParticleSystem ps = currentFlameInstance.GetComponent<ParticleSystem>();
-
-            if (ps != null)
+            float dist = Vector3.Distance(transform.position, player.position);
+            if (dist <= smashRadius)
             {
-                // 2. 「これ以上新しい炎は出さない」という命令を出す
-                // すでに出ている炎は寿命が来るまでそのまま残ります
-                ps.Stop();
+                player.GetComponent<PlayerHP>()?.TakeDamage(smashDamage);
+
+                // 必要ならここでノックバック処理を追加
+                Debug.Log("オークのスマッシュ攻撃ヒット！");
             }
-
-            // 3. (重要) 炎の残像が頭の動きについてくると不自然なので、親子関係を解除する
-            // これにより、ドラゴンの頭が動いても、吐き終わった煙はその場に留まります
-            currentFlameInstance.transform.SetParent(null);
-
-            // 4. 残りの炎が完全に消えるくらいの時間（例えば3秒後）にオブジェクトを消す
-            Destroy(currentFlameInstance, 3.0f);
-
-            // 参照を切る
-            currentFlameInstance = null;
         }
     }
 
@@ -302,22 +267,19 @@ public class BossAI_Orc : BossAI
     private void OnDestroy()
     {
         if (currentIndicator != null) Destroy(currentIndicator);
-        if (currentFlameInstance != null) Destroy(currentFlameInstance);
     }
+
     private void OnDrawGizmosSelected()
     {
-        // 攻撃範囲（赤色）
+        // 通常攻撃範囲（扇形）
         Gizmos.color = new Color(1, 0, 0, 0.3f);
-
-        // 円を描く代わりに扇形の両端の線を描画
         Vector3 leftDir = Quaternion.Euler(0, -attackAngle, 0) * transform.forward;
         Vector3 rightDir = Quaternion.Euler(0, attackAngle, 0) * transform.forward;
-
         Gizmos.DrawRay(transform.position, leftDir * attackRange);
         Gizmos.DrawRay(transform.position, rightDir * attackRange);
 
-        // 前方の線
-        Gizmos.color = Color.red;
-        Gizmos.DrawRay(transform.position, transform.forward * attackRange);
+        // 範囲攻撃（スマッシュ）範囲（黄色い円）
+        Gizmos.color = new Color(1, 0.92f, 0.016f, 0.3f);
+        Gizmos.DrawWireSphere(transform.position, smashRadius);
     }
 }
