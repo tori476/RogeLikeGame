@@ -174,7 +174,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""SummonBoss"",
+                    ""name"": ""SummonBoss_S"",
                     ""type"": ""Button"",
                     ""id"": ""06f36473-5d8e-41c1-8a05-0c11a4eb27ea"",
                     ""expectedControlType"": """",
@@ -186,6 +186,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""name"": ""LockOn"",
                     ""type"": ""Button"",
                     ""id"": ""585fb450-6aeb-4efd-a23a-44de58622b1f"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SummonBoss_R"",
+                    ""type"": ""Button"",
+                    ""id"": ""6ddbce45-1076-4c58-ad06-13fc085f45ac"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -585,7 +594,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": "";Keyboard&Mouse"",
-                    ""action"": ""SummonBoss"",
+                    ""action"": ""SummonBoss_S"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -596,7 +605,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""SummonBoss"",
+                    ""action"": ""SummonBoss_S"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -619,6 +628,28 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": "";Gamepad"",
                     ""action"": ""LockOn"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""d2a0bcf4-54d4-46b1-8ba6-b66e680e47fb"",
+                    ""path"": ""<Keyboard>/r"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""SummonBoss_R"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""089ac2a8-e646-48dd-b37b-b44145d8b3d2"",
+                    ""path"": ""<Gamepad>/leftTrigger"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Gamepad"",
+                    ""action"": ""SummonBoss_R"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1237,8 +1268,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_Player_Previous = m_Player.FindAction("Previous", throwIfNotFound: true);
         m_Player_Next = m_Player.FindAction("Next", throwIfNotFound: true);
         m_Player_Sprint = m_Player.FindAction("Sprint", throwIfNotFound: true);
-        m_Player_SummonBoss = m_Player.FindAction("SummonBoss", throwIfNotFound: true);
+        m_Player_SummonBoss_S = m_Player.FindAction("SummonBoss_S", throwIfNotFound: true);
         m_Player_LockOn = m_Player.FindAction("LockOn", throwIfNotFound: true);
+        m_Player_SummonBoss_R = m_Player.FindAction("SummonBoss_R", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1341,8 +1373,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Previous;
     private readonly InputAction m_Player_Next;
     private readonly InputAction m_Player_Sprint;
-    private readonly InputAction m_Player_SummonBoss;
+    private readonly InputAction m_Player_SummonBoss_S;
     private readonly InputAction m_Player_LockOn;
+    private readonly InputAction m_Player_SummonBoss_R;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -1391,13 +1424,17 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @Sprint => m_Wrapper.m_Player_Sprint;
         /// <summary>
-        /// Provides access to the underlying input action "Player/SummonBoss".
+        /// Provides access to the underlying input action "Player/SummonBoss_S".
         /// </summary>
-        public InputAction @SummonBoss => m_Wrapper.m_Player_SummonBoss;
+        public InputAction @SummonBoss_S => m_Wrapper.m_Player_SummonBoss_S;
         /// <summary>
         /// Provides access to the underlying input action "Player/LockOn".
         /// </summary>
         public InputAction @LockOn => m_Wrapper.m_Player_LockOn;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/SummonBoss_R".
+        /// </summary>
+        public InputAction @SummonBoss_R => m_Wrapper.m_Player_SummonBoss_R;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1451,12 +1488,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Sprint.started += instance.OnSprint;
             @Sprint.performed += instance.OnSprint;
             @Sprint.canceled += instance.OnSprint;
-            @SummonBoss.started += instance.OnSummonBoss;
-            @SummonBoss.performed += instance.OnSummonBoss;
-            @SummonBoss.canceled += instance.OnSummonBoss;
+            @SummonBoss_S.started += instance.OnSummonBoss_S;
+            @SummonBoss_S.performed += instance.OnSummonBoss_S;
+            @SummonBoss_S.canceled += instance.OnSummonBoss_S;
             @LockOn.started += instance.OnLockOn;
             @LockOn.performed += instance.OnLockOn;
             @LockOn.canceled += instance.OnLockOn;
+            @SummonBoss_R.started += instance.OnSummonBoss_R;
+            @SummonBoss_R.performed += instance.OnSummonBoss_R;
+            @SummonBoss_R.canceled += instance.OnSummonBoss_R;
         }
 
         /// <summary>
@@ -1495,12 +1535,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Sprint.started -= instance.OnSprint;
             @Sprint.performed -= instance.OnSprint;
             @Sprint.canceled -= instance.OnSprint;
-            @SummonBoss.started -= instance.OnSummonBoss;
-            @SummonBoss.performed -= instance.OnSummonBoss;
-            @SummonBoss.canceled -= instance.OnSummonBoss;
+            @SummonBoss_S.started -= instance.OnSummonBoss_S;
+            @SummonBoss_S.performed -= instance.OnSummonBoss_S;
+            @SummonBoss_S.canceled -= instance.OnSummonBoss_S;
             @LockOn.started -= instance.OnLockOn;
             @LockOn.performed -= instance.OnLockOn;
             @LockOn.canceled -= instance.OnLockOn;
+            @SummonBoss_R.started -= instance.OnSummonBoss_R;
+            @SummonBoss_R.performed -= instance.OnSummonBoss_R;
+            @SummonBoss_R.canceled -= instance.OnSummonBoss_R;
         }
 
         /// <summary>
@@ -1865,12 +1908,12 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnSprint(InputAction.CallbackContext context);
         /// <summary>
-        /// Method invoked when associated input action "SummonBoss" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// Method invoked when associated input action "SummonBoss_S" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnSummonBoss(InputAction.CallbackContext context);
+        void OnSummonBoss_S(InputAction.CallbackContext context);
         /// <summary>
         /// Method invoked when associated input action "LockOn" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
@@ -1878,6 +1921,13 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnLockOn(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "SummonBoss_R" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSummonBoss_R(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

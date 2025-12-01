@@ -1963,7 +1963,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1125697724}
         m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
-        m_MethodName: OnSpecialAbility
+        m_MethodName: OnSpecialAbility_S
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1979,6 +1979,22 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: 585fb450-6aeb-4efd-a23a-44de58622b1f
     m_ActionName: 'Player/LockOn[/Keyboard/tab]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1125697724}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: OnSpecialAbility_D
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 6ddbce45-1076-4c58-ad06-13fc085f45ac
+    m_ActionName: 'Player/SummonBoss_R[/Keyboard/r]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: 
@@ -2007,9 +2023,11 @@ MonoBehaviour:
   maxChargeDuration: 2
   chargeAttackDuration: 1
   weaponCollider: {fileID: 1311242597}
-  summonedBossPrefab: {fileID: 5804555491880384347, guid: f55407df1593e42c2bcf5f53908bf2ed, type: 3}
+  summonedBossFlyScorpionPrefab: {fileID: 5804555491880384347, guid: f55407df1593e42c2bcf5f53908bf2ed, type: 3}
+  summonedBossRedDragonPrefab: {fileID: 7460916330407893544, guid: 140c21ff477ec4e39bebac3dde9f7ae4, type: 3}
   summonPoint: {fileID: 844659293}
-  hasBossSummonAbility: 0
+  hasBossFlyScorpionSummonAbility: 0
+  hasBossRedDragonSummonAbility: 0
 --- !u!4 &1125697726 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1438546959266459337, guid: 60770bdb4dc667c45bea53db0339dc05, type: 3}
@@ -2055,7 +2073,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHP
   maxHealth: 3
-  invincibilityDuration: 1.5
+  invincibilityDuration: 2
   blinkInterval: 0.1
   heartPrefab: {fileID: 2336036474711145968, guid: 01c12318df08a4b6ca6fdd57e6cc1d0c, type: 3}
   heartsContainer: {fileID: 63960679}
@@ -2719,7 +2737,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonGenerator
   startRoomPrefab: {fileID: 4479279867502507703, guid: 8c35d2860f5e84027a13566c35b56a74, type: 3}
   endRoomPrefabsByFloor:
-  - {fileID: 5066933235728734100, guid: f68b673ccc0fafc40aa88b3b57ce8aa6, type: 3}
+  - {fileID: 5066933235728734100, guid: adbb32665910a41a7887d9fbd5f04fb2, type: 3}
   - {fileID: 5066933235728734100, guid: 324513bf1cb309640a27c2503d1c0674, type: 3}
   - {fileID: 5066933235728734100, guid: f68b673ccc0fafc40aa88b3b57ce8aa6, type: 3}
   defaultEndRoomPrefab: {fileID: 0}
