@@ -1,20 +1,35 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System.Linq; // Listの操作（ランダム選択、削除）に必要
+using System.Linq;
+
 public class TreasureBox : MonoBehaviour
 {
     private Animator anim;
     private bool hasPlayerEntered = false;
 
     [Header("アイテム設定")]
-    // インスペクターからアイテムのプレハブ（ItemBaseを継承したもの）を複数設定するリスト
+    // インスペクターからアイテムのプレハブを設定
     public List<GameObject> droppableItems = new List<GameObject>();
 
-    [Header("ドロップ設定")]
-    public Transform dropPoint; // アイテムが出現する位置（子オブジェクトの空のTransformを推奨）
+    [Header("重複設定")]
+    [Tooltip("チェックを入れると、階層をまたいでも同じアイテムが出ないようになります")]
+    public bool preventGlobalDuplicates = true;
 
-    // ドロップ可能なアイテムのリストを保持・管理するためのランタイムリスト
+    [Header("ドロップ設定")]
+    public Transform dropPoint;
+
+    // ランタイムで使用するリスト
     private List<GameObject> remainingItems;
+
+    // ★追加: ゲーム起動中、全ての宝箱で共有される「取得済みアイテム」の記憶
+    private static HashSet<string> globalObtainedItems = new HashSet<string>();
+
+    // ★追加: ゲームリセット時（タイトルに戻るなど）に呼び出して履歴を消す
+    public static void ResetTreasureHistory()
+    {
+        globalObtainedItems.Clear();
+        Debug.Log("宝箱の取得履歴をリセットしました。");
+    }
 
     void Start()
     {
@@ -26,39 +41,48 @@ public class TreasureBox : MonoBehaviour
 
         if (dropPoint == null)
         {
-            Debug.LogWarning("Drop Pointが設定されていません。チェスト自身の位置をドロップ地点として使用します。");
             dropPoint = transform;
         }
 
-        // 初期アイテムリストをコピーしてランタイムリストを作成
-        remainingItems = new List<GameObject>(droppableItems);
+        // --- リストの初期化ロジックを変更 ---
+        InitializeDropList();
     }
 
-    // プレイヤーがチェストに近づいたときや操作キーを押したときに呼ばれる想定のメソッド
+    private void InitializeDropList()
+    {
+        // 1. まず元のリストをコピー
+        remainingItems = new List<GameObject>(droppableItems);
+
+        // 2. 重複禁止設定がONなら、履歴にあるアイテムを削除する
+        if (preventGlobalDuplicates)
+        {
+            // 名前で照合して削除（アイテム名(Clone)などに対応するため、Prefab名を基準にするのが安全）
+            // ここではPrefabのnameそのままで判定します
+            remainingItems.RemoveAll(item => globalObtainedItems.Contains(item.name));
+
+            // もしフィルタリングした結果、出すものがなくなってしまった場合
+            if (remainingItems.Count == 0 && droppableItems.Count > 0)
+            {
+                Debug.Log("全てのユニークアイテムを取得済みです。リストをリセットして再抽選可能にします。");
+                remainingItems = new List<GameObject>(droppableItems);
+            }
+        }
+    }
+
     public void OpenChest()
     {
-        // アイテムが残っているかチェック
         if (remainingItems.Count > 0)
         {
-            // チェストを開けるアニメーションを再生
             anim.SetTrigger("Open");
-            Debug.Log("チェストを開けます。残りドロップ回数: " + remainingItems.Count);
-        }
-        else
-        {
-            Debug.Log("チェストにはもうアイテムが残っていません。");
-            // アイテムがない場合の待機アニメーションなどを再生しても良い
         }
     }
 
     // ★★★ アニメーションイベントから呼び出されるメソッド ★★★
-    // アニメーションクリップ内の、アイテムが出現するタイミングのフレームにイベントを設定してください。
     public void SpawnRandomItem()
     {
-        // 残っているアイテムがなければドロップ処理を中断
         if (remainingItems.Count == 0)
         {
-            Debug.Log("ドロップ可能なアイテムが残っていません。");
+            Debug.Log("ドロップ可能なアイテムがありません。");
             return;
         }
 
@@ -66,13 +90,21 @@ public class TreasureBox : MonoBehaviour
         int randomIndex = Random.Range(0, remainingItems.Count);
         GameObject itemToDrop = remainingItems[randomIndex];
 
-        // 2. アイテムを生成（ItemBaseのStart()で自動的に飛び出す）
+        // 2. アイテムを生成
         Instantiate(itemToDrop, dropPoint.position, Quaternion.identity);
         Debug.Log(itemToDrop.name + " をドロップしました！");
 
-        // 3. 一度ドロップしたアイテムをリストから削除（二度と出ないようにする）
+        // 3. ★追加: グローバル履歴に登録（名前で記憶）
+        if (preventGlobalDuplicates)
+        {
+            if (!globalObtainedItems.Contains(itemToDrop.name))
+            {
+                globalObtainedItems.Add(itemToDrop.name);
+            }
+        }
+
+        // 4. この箱のリストから削除（連打防止）
         remainingItems.RemoveAt(randomIndex);
-        Debug.Log("アイテムをリストから削除しました。残りアイテム数: " + remainingItems.Count);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -81,15 +113,14 @@ public class TreasureBox : MonoBehaviour
         {
             hasPlayerEntered = true;
             anim.SetTrigger("open");
-            // アイテムが残っているかチェック
+
             if (remainingItems.Count > 0)
             {
-                Debug.Log("チェストを開けます。残りドロップ回数: " + remainingItems.Count);
+                Debug.Log($"チェストを開けます。候補数: {remainingItems.Count}");
             }
             else
             {
-                Debug.Log("チェストにはもうアイテムが残っていません。");
-                // アイテムがない場合の待機アニメーションなどを再生しても良い
+                Debug.Log("チェストにはアイテムがありません（取得済み）。");
             }
         }
     }

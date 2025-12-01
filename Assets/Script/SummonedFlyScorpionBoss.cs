@@ -6,7 +6,7 @@ using System.Linq; // LINQを使って最も近い敵を探すために必要
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(Animator))]
-public class SummonedBoss : MonoBehaviour
+public class SummonedFlyScorpionBoss : MonoBehaviour
 {
     [Header("突進攻撃の設定")]
     public float chargePreparationTime = 1.5f;  // 突進前の溜め時間（秒）
