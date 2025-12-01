@@ -42,6 +42,7 @@ public class DungeonManager : MonoBehaviour
 
     void Start()
     {
+        TreasureBox.ResetTreasureHistory();
         navMeshSurface = GetComponent<NavMeshSurface>();
         GenerateDungeon();
         // NavMesh構築

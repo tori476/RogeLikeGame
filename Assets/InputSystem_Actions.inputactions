@@ -88,7 +88,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "SummonBoss",
+                    "name": "SummonBoss_S",
                     "type": "Button",
                     "id": "06f36473-5d8e-41c1-8a05-0c11a4eb27ea",
                     "expectedControlType": "",
@@ -100,6 +100,15 @@
                     "name": "LockOn",
                     "type": "Button",
                     "id": "585fb450-6aeb-4efd-a23a-44de58622b1f",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SummonBoss_R",
+                    "type": "Button",
+                    "id": "6ddbce45-1076-4c58-ad06-13fc085f45ac",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -499,7 +508,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
-                    "action": "SummonBoss",
+                    "action": "SummonBoss_S",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -510,7 +519,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "SummonBoss",
+                    "action": "SummonBoss_S",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -533,6 +542,28 @@
                     "processors": "",
                     "groups": ";Gamepad",
                     "action": "LockOn",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d2a0bcf4-54d4-46b1-8ba6-b66e680e47fb",
+                    "path": "<Keyboard>/r",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "SummonBoss_R",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "089ac2a8-e646-48dd-b37b-b44145d8b3d2",
+                    "path": "<Gamepad>/leftTrigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "SummonBoss_R",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
