@@ -2028,6 +2028,9 @@ MonoBehaviour:
   summonPoint: {fileID: 844659293}
   hasBossFlyScorpionSummonAbility: 0
   hasBossRedDragonSummonAbility: 0
+  orbitProjectilePrefab: {fileID: 7118824838423685637, guid: ac467996947cf4d2499edd457d832711, type: 3}
+  swordShotPrefab: {fileID: 0}
+  swordShotSpawnPoint: {fileID: 0}
 --- !u!4 &1125697726 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1438546959266459337, guid: 60770bdb4dc667c45bea53db0339dc05, type: 3}

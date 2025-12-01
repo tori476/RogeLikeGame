@@ -142,7 +142,7 @@ public class EnemyAI : MonoBehaviour
         if (agent.isActiveAndEnabled)
         {
             agent.isStopped = true;
-            agent.enabled = false;
+            //agent.enabled = false;
         }
 
         // Rigidbodyを物理演算の対象にする

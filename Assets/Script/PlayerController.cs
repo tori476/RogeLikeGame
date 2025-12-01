@@ -49,6 +49,16 @@ public class PlayerController : MonoBehaviour
     private bool isDashing = false;
     private bool isCharging = false;
 
+    [Header("アイテム設定")]
+    public GameObject orbitProjectilePrefab; // 回転する弾のプレハブ（OrbitingProjectileスクリプト付き）
+    private GameObject currentOrbitProjectile; // 生成済みの弾を保持する変数
+
+    [Header("ソードショット設定")]
+    public GameObject swordShotPrefab; // 飛び道具のプレハブ (インスペクターで設定)
+    public Transform swordShotSpawnPoint; // 発射位置 (インスペクターで設定。なければプレイヤー位置)
+
+    private bool hasSwordShotAbility = false; // ソードショット能力を持っているか判定するBool
+
     private bool isChargingAttack = false;
     private float chargeStartTime;
 
@@ -255,6 +265,21 @@ public class PlayerController : MonoBehaviour
             weaponDamageDealer.SetDamage(25); // 25は基本ダメージ
         }
     }
+
+    public void FireSwordShot()
+    {
+        // 能力を持っていない、またはプレハブが設定されていない場合は何もしない
+        if (!hasSwordShotAbility || swordShotPrefab == null)
+        {
+            return;
+        }
+
+        // 発射位置の決定（SpawnPointがなければプレイヤーの前方少し上）
+        Vector3 spawnPos = swordShotSpawnPoint != null ? swordShotSpawnPoint.position : transform.position + transform.forward + Vector3.up;
+
+        // プレイヤーの向きに合わせて発射
+        Instantiate(swordShotPrefab, spawnPos, transform.rotation * Quaternion.Euler(90f, 0f, 0f));
+    }
     private IEnumerator ResetAttackCooldown()
     {
         yield return new WaitForSeconds(attackCooldown);
@@ -288,9 +313,42 @@ public class PlayerController : MonoBehaviour
         isChargingAttack = true;
     }
 
+    public void SwordShotItem()
+    {
+        hasSwordShotAbility = true;
+    }
+
     public void ComboAttackItem()
     {
         anim.SetBool("ComboAttack", true);
+    }
+
+    public void NoneItem()
+    {
+        if (orbitProjectilePrefab == null)
+        {
+            Debug.LogWarning("OrbitProjectilePrefab が設定されていません！インスペクターで設定してください。");
+            return;
+        }
+
+        // 既に弾を生成済みの場合は、重複生成しない（あるいはリセットする等の仕様ならここを変える）
+        if (currentOrbitProjectile != null)
+        {
+            Debug.Log("既に回転弾は有効です。");
+            return;
+        }
+
+        // 弾を生成
+        currentOrbitProjectile = Instantiate(orbitProjectilePrefab, transform.position, Quaternion.identity);
+
+        // 生成した弾のスクリプトを取得し、プレイヤー情報を渡して初期化
+        OrbitingProjectile orbScript = currentOrbitProjectile.GetComponent<OrbitingProjectile>();
+        if (orbScript != null)
+        {
+            orbScript.Initialize(this.transform);
+        }
+
+        Debug.Log("回転弾アイテムを使用しました！");
     }
 
     private void SummonFlyScorpionBoss()
