@@ -1392,6 +1392,37 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
+--- !u!1 &5677829625935088103
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 813532398286488710}
+  m_Layer: 6
+  m_Name: FlamePoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &813532398286488710
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5677829625935088103}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.13052624, y: 0, z: 0, w: 0.9914449}
+  m_LocalPosition: {x: 0, y: -8.8, z: 132.2}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3999154836569970133}
+  m_LocalEulerAnglesHint: {x: -15, y: 0, z: 0}
 --- !u!1 &5782077736974909712
 GameObject:
   m_ObjectHideFlags: 0
@@ -6376,7 +6407,7 @@ PrefabInstance:
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 479228, guid: eb58e8f2831a51f45a44a261e6710cdd, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 7260672334732649403}
+      addedObject: {fileID: 813532398286488710}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 139696, guid: eb58e8f2831a51f45a44a261e6710cdd, type: 3}
       insertIndex: -1
@@ -6524,12 +6555,12 @@ MonoBehaviour:
   knockbackForce: 10
   knockbackDuration: 0.4
   bossName: Dragon
-  bossSummonItemPrefab: {fileID: 0}
+  bossSummonItemPrefab: {fileID: 8576177181214657101, guid: 0f7822c5533754267bb91c4a26ca092c, type: 3}
   stairsPrefab: {fileID: 65406258319181547, guid: 388d9b17ab21db24abe453cf6da856ae, type: 3}
   flameAttackCooldown: 3
   flameDamage: 2
   flameEffectPrefab: {fileID: 4189398331686211174, guid: 03c0b2188772640ac9200eda1dfc4473, type: 3}
-  flameSpawnPoint: {fileID: 7260672334732649403}
+  flameSpawnPoint: {fileID: 813532398286488710}
   attackAngle: 10
   chargeRange: 15
   chargePrepTime: 1.5

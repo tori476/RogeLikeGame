@@ -3339,6 +3339,7 @@ MonoBehaviour:
   - {fileID: 5319370966736654105, guid: 1243e121699d54feea519c29a25eddfc, type: 3}
   - {fileID: 5319370966736654105, guid: 764cfd01b1dfe4299a9bd39e258d3d2d, type: 3}
   - {fileID: 5319370966736654105, guid: 4d2c4b2542d334c69beec5676b62724c, type: 3}
+  - {fileID: 5319370966736654105, guid: 96946f236e9b9494188e5c36b85018e0, type: 3}
   preventGlobalDuplicates: 1
   dropPoint: {fileID: 7940536206811797202}
 --- !u!4 &8860738285087893636 stripped

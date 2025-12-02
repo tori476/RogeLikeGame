@@ -174,15 +174,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""SummonBoss_S"",
-                    ""type"": ""Button"",
-                    ""id"": ""06f36473-5d8e-41c1-8a05-0c11a4eb27ea"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
                     ""name"": ""LockOn"",
                     ""type"": ""Button"",
                     ""id"": ""585fb450-6aeb-4efd-a23a-44de58622b1f"",
@@ -192,9 +183,18 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""SummonBoss_R"",
+                    ""name"": ""SwitchBoss"",
+                    ""type"": ""Value"",
+                    ""id"": ""fd121000-db60-40ab-b441-d28e38995406"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""SummonBoss"",
                     ""type"": ""Button"",
-                    ""id"": ""6ddbce45-1076-4c58-ad06-13fc085f45ac"",
+                    ""id"": ""dd5208bf-6c75-464b-a6cc-fa76d6366990"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -589,28 +589,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""dd0d30ad-8a3d-4875-af10-331d10cfcd7d"",
-                    ""path"": ""<Keyboard>/e"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": "";Keyboard&Mouse"",
-                    ""action"": ""SummonBoss_S"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""e724e613-f94f-4521-bc21-3dc8e590a388"",
-                    ""path"": ""<Gamepad>/buttonNorth"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""SummonBoss_S"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""ceac928a-9706-431d-8c6f-5cc5ea6664b5"",
                     ""path"": ""<Keyboard>/tab"",
                     ""interactions"": """",
@@ -623,7 +601,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""725d5436-4a87-460b-9389-29fa9c51a020"",
-                    ""path"": ""<Gamepad>/leftTrigger"",
+                    ""path"": ""<Gamepad>/buttonEast"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": "";Gamepad"",
@@ -632,24 +610,90 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 },
                 {
-                    ""name"": """",
-                    ""id"": ""d2a0bcf4-54d4-46b1-8ba6-b66e680e47fb"",
-                    ""path"": ""<Keyboard>/r"",
+                    ""name"": ""1D Axis"",
+                    ""id"": ""493e9a87-88ac-4b9c-8ec9-becfc8f1cdfa"",
+                    ""path"": ""1DAxis"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": "";Keyboard&Mouse"",
-                    ""action"": ""SummonBoss_R"",
+                    ""groups"": """",
+                    ""action"": ""SwitchBoss"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""b4354dc4-c304-49dc-b58e-66b1c4e3a8cf"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SwitchBoss"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""c67b8e81-b829-4fa2-8aa6-c5bbe2758b1c"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SwitchBoss"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""1D Axis"",
+                    ""id"": ""fd67caf6-741a-4f65-aab4-4ac89efa7357"",
+                    ""path"": ""1DAxis"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SwitchBoss"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""5975bd7a-1827-43a5-8b52-a7ab76998cf6"",
+                    ""path"": ""<Gamepad>/leftTrigger"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SwitchBoss"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""ddc903fe-04cf-42da-8669-21153e00d3bd"",
+                    ""path"": ""<Gamepad>/rightTrigger"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SwitchBoss"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""ee945047-1d87-4dba-b0cc-378a9dd528ac"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SummonBoss"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
-                    ""id"": ""089ac2a8-e646-48dd-b37b-b44145d8b3d2"",
-                    ""path"": ""<Gamepad>/leftTrigger"",
+                    ""id"": ""2a925885-2e10-4f0e-af87-e3fbe43d35b9"",
+                    ""path"": ""<Gamepad>/buttonNorth"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": "";Gamepad"",
-                    ""action"": ""SummonBoss_R"",
+                    ""groups"": """",
+                    ""action"": ""SummonBoss"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1268,9 +1312,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_Player_Previous = m_Player.FindAction("Previous", throwIfNotFound: true);
         m_Player_Next = m_Player.FindAction("Next", throwIfNotFound: true);
         m_Player_Sprint = m_Player.FindAction("Sprint", throwIfNotFound: true);
-        m_Player_SummonBoss_S = m_Player.FindAction("SummonBoss_S", throwIfNotFound: true);
         m_Player_LockOn = m_Player.FindAction("LockOn", throwIfNotFound: true);
-        m_Player_SummonBoss_R = m_Player.FindAction("SummonBoss_R", throwIfNotFound: true);
+        m_Player_SwitchBoss = m_Player.FindAction("SwitchBoss", throwIfNotFound: true);
+        m_Player_SummonBoss = m_Player.FindAction("SummonBoss", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1373,9 +1417,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Previous;
     private readonly InputAction m_Player_Next;
     private readonly InputAction m_Player_Sprint;
-    private readonly InputAction m_Player_SummonBoss_S;
     private readonly InputAction m_Player_LockOn;
-    private readonly InputAction m_Player_SummonBoss_R;
+    private readonly InputAction m_Player_SwitchBoss;
+    private readonly InputAction m_Player_SummonBoss;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -1424,17 +1468,17 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @Sprint => m_Wrapper.m_Player_Sprint;
         /// <summary>
-        /// Provides access to the underlying input action "Player/SummonBoss_S".
-        /// </summary>
-        public InputAction @SummonBoss_S => m_Wrapper.m_Player_SummonBoss_S;
-        /// <summary>
         /// Provides access to the underlying input action "Player/LockOn".
         /// </summary>
         public InputAction @LockOn => m_Wrapper.m_Player_LockOn;
         /// <summary>
-        /// Provides access to the underlying input action "Player/SummonBoss_R".
+        /// Provides access to the underlying input action "Player/SwitchBoss".
         /// </summary>
-        public InputAction @SummonBoss_R => m_Wrapper.m_Player_SummonBoss_R;
+        public InputAction @SwitchBoss => m_Wrapper.m_Player_SwitchBoss;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/SummonBoss".
+        /// </summary>
+        public InputAction @SummonBoss => m_Wrapper.m_Player_SummonBoss;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1488,15 +1532,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Sprint.started += instance.OnSprint;
             @Sprint.performed += instance.OnSprint;
             @Sprint.canceled += instance.OnSprint;
-            @SummonBoss_S.started += instance.OnSummonBoss_S;
-            @SummonBoss_S.performed += instance.OnSummonBoss_S;
-            @SummonBoss_S.canceled += instance.OnSummonBoss_S;
             @LockOn.started += instance.OnLockOn;
             @LockOn.performed += instance.OnLockOn;
             @LockOn.canceled += instance.OnLockOn;
-            @SummonBoss_R.started += instance.OnSummonBoss_R;
-            @SummonBoss_R.performed += instance.OnSummonBoss_R;
-            @SummonBoss_R.canceled += instance.OnSummonBoss_R;
+            @SwitchBoss.started += instance.OnSwitchBoss;
+            @SwitchBoss.performed += instance.OnSwitchBoss;
+            @SwitchBoss.canceled += instance.OnSwitchBoss;
+            @SummonBoss.started += instance.OnSummonBoss;
+            @SummonBoss.performed += instance.OnSummonBoss;
+            @SummonBoss.canceled += instance.OnSummonBoss;
         }
 
         /// <summary>
@@ -1535,15 +1579,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Sprint.started -= instance.OnSprint;
             @Sprint.performed -= instance.OnSprint;
             @Sprint.canceled -= instance.OnSprint;
-            @SummonBoss_S.started -= instance.OnSummonBoss_S;
-            @SummonBoss_S.performed -= instance.OnSummonBoss_S;
-            @SummonBoss_S.canceled -= instance.OnSummonBoss_S;
             @LockOn.started -= instance.OnLockOn;
             @LockOn.performed -= instance.OnLockOn;
             @LockOn.canceled -= instance.OnLockOn;
-            @SummonBoss_R.started -= instance.OnSummonBoss_R;
-            @SummonBoss_R.performed -= instance.OnSummonBoss_R;
-            @SummonBoss_R.canceled -= instance.OnSummonBoss_R;
+            @SwitchBoss.started -= instance.OnSwitchBoss;
+            @SwitchBoss.performed -= instance.OnSwitchBoss;
+            @SwitchBoss.canceled -= instance.OnSwitchBoss;
+            @SummonBoss.started -= instance.OnSummonBoss;
+            @SummonBoss.performed -= instance.OnSummonBoss;
+            @SummonBoss.canceled -= instance.OnSummonBoss;
         }
 
         /// <summary>
@@ -1908,13 +1952,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnSprint(InputAction.CallbackContext context);
         /// <summary>
-        /// Method invoked when associated input action "SummonBoss_S" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnSummonBoss_S(InputAction.CallbackContext context);
-        /// <summary>
         /// Method invoked when associated input action "LockOn" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
@@ -1922,12 +1959,19 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnLockOn(InputAction.CallbackContext context);
         /// <summary>
-        /// Method invoked when associated input action "SummonBoss_R" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// Method invoked when associated input action "SwitchBoss" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnSummonBoss_R(InputAction.CallbackContext context);
+        void OnSwitchBoss(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "SummonBoss" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSummonBoss(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.
