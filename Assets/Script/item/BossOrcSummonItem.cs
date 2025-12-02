@@ -2,7 +2,7 @@
 using UnityEngine;
 
 // BossSummonItem は ItemBase を継承する
-public class BossRedDragonSummonItem1 : ItemBase
+public class BossOrcSummonItem : ItemBase
 {
     // Start()とUpdate()は基底クラスのものを利用するため、今回は記述しない。
 
@@ -13,7 +13,7 @@ public class BossRedDragonSummonItem1 : ItemBase
         if (playerController != null)
         {
             // プレイヤーにボス召喚アビリティを付与する
-            playerController.GrantBossRedDragonSummonAbility();
+            playerController.GrantBossOrcSummonAbility();
             Debug.Log("プレイヤーがボス召喚アイテムを取得しました！");
         }
     }
