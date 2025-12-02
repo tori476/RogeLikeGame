@@ -42,7 +42,6 @@ public class DungeonManager : MonoBehaviour
 
     void Start()
     {
-        TreasureBox.ResetTreasureHistory();
         navMeshSurface = GetComponent<NavMeshSurface>();
         GenerateDungeon();
         // NavMesh構築
@@ -197,12 +196,42 @@ public class DungeonManager : MonoBehaviour
             Debug.LogWarning($"目標の通常部屋数 {numberOfNormalRooms} に届きませんでした。");
         }
 
+        // ===== デバッグ情報 =====
+        Debug.Log($"<color=cyan>【ダンジョン生成完了】合計部屋数: {spawnedRooms.Count}</color>");
+        for (int i = 0; i < spawnedRooms.Count; i++)
+        {
+            var room = spawnedRooms[i];
+            if (room != null)
+            {
+                Debug.Log($"  部屋{i}: {room.name} at {room.transform.position}, Active: {room.activeSelf}, Layer: {LayerMask.LayerToName(room.layer)}");
+                
+                // レンダラーの状態確認
+                var renderers = room.GetComponentsInChildren<Renderer>();
+                int visibleCount = 0;
+                foreach (var r in renderers)
+                {
+                    if (r.enabled) visibleCount++;
+                }
+                Debug.Log($"    Renderers: {visibleCount}/{renderers.Length} 有効");
+            }
+        }
+        
+        // カメラの位置と向きを確認
+        Camera mainCam = Camera.main;
+        if (mainCam != null)
+        {
+            Debug.Log($"<color=yellow>【カメラ情報】位置: {mainCam.transform.position}, 向き: {mainCam.transform.forward}, Far Clip: {mainCam.farClipPlane}</color>");
+        }
+        else
+        {
+            Debug.LogWarning("<color=red>メインカメラが見つかりません!</color>");
+        }
+
         CloseOpenConnectors();
         // NavMesh構築（フレーム遅延不要、即時構築）
         if (navMeshSurface != null)
         {
-            StartCoroutine(BuildNavMeshDelayed());
-            //navMeshSurface.BuildNavMesh();
+            navMeshSurface.BuildNavMesh();
         }
     }
 
@@ -232,9 +261,9 @@ public class DungeonManager : MonoBehaviour
         Debug.Log($"<color=cyan>【EndRoom選択】floorIndex: {floorIndex}, 配列サイズ: {(endRoomPrefabsByFloor != null ? endRoomPrefabsByFloor.Length : 0)}</color>");
 
         // 階層に対応するプレハブが存在するかチェック
-        if (endRoomPrefabsByFloor != null &&
-            floorIndex >= 0 &&
-            floorIndex < endRoomPrefabsByFloor.Length &&
+        if (endRoomPrefabsByFloor != null && 
+            floorIndex >= 0 && 
+            floorIndex < endRoomPrefabsByFloor.Length && 
             endRoomPrefabsByFloor[floorIndex] != null)
         {
             Debug.Log($"<color=green>【EndRoom選択】{currentFloor}階用のEndRoomを使用: {endRoomPrefabsByFloor[floorIndex].name}</color>");
@@ -337,125 +366,260 @@ public class DungeonManager : MonoBehaviour
         bool placed = false;
         if (furthestConnector != null)
         {
-            // 2. 見つけた場所にエンド部屋を接続してみる
-            if (TryConnectNewItem(endRoomPrefab, furthestConnector))
+            // 2. 見つけた場所にエンド部屋を接続してみる（EndRoom側の全コネクターを試す）
+            if (TryConnectNewItemToSpecificConnector_AllNewConnectors(endRoomPrefab, furthestConnector))
             {
                 placed = true;
+                Debug.Log("エンド部屋を最遠コネクターに配置しました。");
             }
         }
 
-        // 配置できなかった場合はavailableConnectorsの中から順に配置を試みる
+        // 配置できなかった場合はavailableConnectorsの中から順に（シャッフルで）配置を試みる
         if (!placed)
         {
-            foreach (var connector in availableConnectors)
+            var connectorsToTry = new List<Transform>(availableConnectors);
+            // Fisher-Yates shuffle
+            for (int i = 0; i < connectorsToTry.Count; i++)
             {
-                if (TryConnectNewItem(endRoomPrefab, connector))
+                int r = Random.Range(i, connectorsToTry.Count);
+                (connectorsToTry[i], connectorsToTry[r]) = (connectorsToTry[r], connectorsToTry[i]);
+            }
+
+            foreach (var connector in connectorsToTry)
+            {
+                if (TryConnectNewItemToSpecificConnector_AllNewConnectors(endRoomPrefab, connector))
                 {
                     placed = true;
-                    Debug.Log("エンド部屋を強制配置しました。");
+                    Debug.Log("エンド部屋を強制配置しました。（全コネクター試行成功）");
                     break;
+                }
+            }
+
+            // 直接接続が全滅した場合、通路経由での接続を試みる
+            if (!placed && corridorPrefabs != null && corridorPrefabs.Length > 0)
+            {
+                foreach (var connector in connectorsToTry)
+                {
+                    if (TryPlaceEndRoomViaCorridor(endRoomPrefab, connector))
+                    {
+                        placed = true;
+                        Debug.Log("エンド部屋を通路経由で配置しました。");
+                        break;
+                    }
+                }
+            }
+
+            // 最終手段: 衝突チェックを緩和して強制配置
+            if (!placed && connectorsToTry.Count > 0)
+            {
+                Debug.LogWarning("通常配置が全て失敗。衝突チェック緩和で強制配置を試みます...");
+                foreach (var connector in connectorsToTry)
+                {
+                    if (ForcePlace_Relaxed(endRoomPrefab, connector))
+                    {
+                        placed = true;
+                        Debug.Log("<color=yellow>エンド部屋を衝突緩和モードで強制配置しました。</color>");
+                        break;
+                    }
                 }
             }
         }
 
         if (!placed)
         {
-            Debug.LogError("エンド部屋の配置に完全に失敗しました。コネクターがありません。");
+            Debug.LogError("エンド部屋の配置に完全に失敗しました。適切なコネクターの組み合わせが見つかりませんでした。");
         }
     }
 
-    // TryConnectNewItemメソッドを丸ごと置き換える
-    private bool TryConnectNewItem(GameObject itemPrefab, Transform specificConnector = null)
+    // 指定した既存コネクターに対して、新規プレハブ側の全コネクターを順に試す
+    private bool TryConnectNewItemToSpecificConnector_AllNewConnectors(GameObject itemPrefab, Transform existingConnector)
     {
-        if (availableConnectors.Count == 0 || itemPrefab == null) return false;
+        if (existingConnector == null || itemPrefab == null) return false;
 
-        int connectorIndex = -1;
-        Transform existingConnector;
-
-        // 接続元のコネクターを決定（引数で指定されていなければランダム）
-        if (specificConnector != null)
-        {
-            existingConnector = specificConnector;
-        }
-        else
-        {
-            connectorIndex = Random.Range(0, availableConnectors.Count);
-            existingConnector = availableConnectors[connectorIndex];
-        }
-
-        // --- ステージ1: 新しい部屋の配置 ---
-
-        // 1. 新しい部屋を生成し、そのコネクターをランダムに選ぶ
+        // 新しい部屋を生成（1インスタンスを全コネクターで位置合わせして試す）
         GameObject newItem = Instantiate(itemPrefab);
-        // NavMeshAgentがあれば一時的に無効化（エラー対策）
+        // NavMeshAgentは一時無効化
         var navAgents = newItem.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>(true);
         foreach (var agent in navAgents) agent.enabled = false;
-        Transform[] newItemConnectors = GetAllConnectors(newItem);
 
-        if (newItemConnectors.Length == 0) // コネクターがないプレハブはエラー
+        var newItemConnectors = GetAllConnectors(newItem);
+        if (newItemConnectors.Length == 0)
         {
             Debug.LogError($"プレハブ '{itemPrefab.name}' に Connector がありません。");
             Destroy(newItem);
             return false;
         }
-        Transform newItemConnector = newItemConnectors[Random.Range(0, newItemConnectors.Length)];
 
-        // 2. 部屋同士のコネクターを合わせて仮配置
-        AlignObject(newItem, newItemConnector, existingConnector);
-
-        // --- ステージ2: 衝突判定 ---
-
-        // 3. 衝突をチェック
-        if (CheckCollision(newItem))
+        // シャッフルして衝突しにくい向きを積極的に探す
+        for (int i = 0; i < newItemConnectors.Length; i++)
         {
-            Destroy(newItem);
-            return false;
+            int r = Random.Range(i, newItemConnectors.Length);
+            (newItemConnectors[i], newItemConnectors[r]) = (newItemConnectors[r], newItemConnectors[i]);
         }
 
-        // --- ステージ3: 配置の確定 ---
-
-        // 4. 部屋をリストに追加
-        spawnedRooms.Add(newItem);
-        spawnedRoomBounds.Add(CalculateBounds(newItem));
-
-        // 5. 使用済みコネクターの位置を記録（小数点以下を丸める）
-        Vector3 existingPos = new Vector3(
-            Mathf.Round(existingConnector.position.x * 100f) / 100f,
-            Mathf.Round(existingConnector.position.y * 100f) / 100f,
-            Mathf.Round(existingConnector.position.z * 100f) / 100f
-        );
-        Vector3 newPos = new Vector3(
-            Mathf.Round(newItemConnector.position.x * 100f) / 100f,
-            Mathf.Round(newItemConnector.position.y * 100f) / 100f,
-            Mathf.Round(newItemConnector.position.z * 100f) / 100f
-        );
-
-        usedConnectorPositions.Add(existingPos);
-        usedConnectorPositions.Add(newPos);
-
-        // 6. コネクターリストを更新
-        availableConnectors.Remove(existingConnector); // 接続済みの古いコネクターを削除
-        foreach (var connector in newItemConnectors)
+        // 各コネクターで試行
+        foreach (var newItemConnector in newItemConnectors)
         {
-            if (connector != newItemConnector)
+            // 位置合わせ
+            AlignObject(newItem, newItemConnector, existingConnector);
+
+            // 衝突チェック
+            if (CheckCollision(newItem))
             {
-                availableConnectors.Add(connector); // 新しい部屋の未使用コネクターを追加
+                continue; // 次のコネクターで再試行
+            }
+
+            // 成功: リスト更新、使用済みコネクター記録、NavMesh再構築、有効化
+            spawnedRooms.Add(newItem);
+            spawnedRoomBounds.Add(CalculateBounds(newItem));
+
+            // 位置丸め
+            Vector3 existingPos = new Vector3(
+                Mathf.Round(existingConnector.position.x * 100f) / 100f,
+                Mathf.Round(existingConnector.position.y * 100f) / 100f,
+                Mathf.Round(existingConnector.position.z * 100f) / 100f
+            );
+            Vector3 newPos = new Vector3(
+                Mathf.Round(newItemConnector.position.x * 100f) / 100f,
+                Mathf.Round(newItemConnector.position.y * 100f) / 100f,
+                Mathf.Round(newItemConnector.position.z * 100f) / 100f
+            );
+
+            usedConnectorPositions.Add(existingPos);
+            usedConnectorPositions.Add(newPos);
+
+            // コネクターリスト更新
+            availableConnectors.Remove(existingConnector);
+            foreach (var c in newItemConnectors)
+            {
+                if (c != newItemConnector)
+                {
+                    availableConnectors.Add(c);
+                }
+            }
+
+            // NavMesh再構築
+            if (navMeshSurface != null)
+            {
+                navMeshSurface.BuildNavMesh();
+            }
+            // NavMeshAgentを有効化
+            foreach (var agent in navAgents) agent.enabled = true;
+
+            return true;
+        }
+
+        // 全コネクターで失敗した場合
+        Destroy(newItem);
+        return false;
+    }
+
+    // 直接接続に失敗した際のフォールバック：通路を介してEndRoomを接続
+    private bool TryPlaceEndRoomViaCorridor(GameObject endRoomPrefab, Transform existingConnector)
+    {
+        if (existingConnector == null || endRoomPrefab == null) return false;
+        if (corridorPrefabs == null || corridorPrefabs.Length == 0) return false;
+
+        foreach (var corridorPrefab in corridorPrefabs)
+        {
+            if (corridorPrefab == null) continue;
+
+            GameObject corridor = Instantiate(corridorPrefab);
+            var corridorAgents = corridor.GetComponentsInChildren<NavMeshAgent>(true);
+            foreach (var a in corridorAgents) a.enabled = false;
+
+            var corridorConnectors = GetAllConnectors(corridor);
+            if (corridorConnectors.Length < 2)
+            {
+                Destroy(corridor);
+                continue;
+            }
+
+            bool placed = false;
+
+            // Corridorの全コネクターを、既存側接続候補として試す
+            foreach (var attachConnector in corridorConnectors)
+            {
+                // アラインしてから衝突チェック
+                AlignObject(corridor, attachConnector, existingConnector);
+                if (CheckCollision(corridor))
+                {
+                    continue;
+                }
+
+                // 一時登録（EndRoom配置が失敗したらロールバック）
+                spawnedRooms.Add(corridor);
+                var corridorBounds = CalculateBounds(corridor);
+                spawnedRoomBounds.Add(corridorBounds);
+
+                // 反対側コネクター（EndRoom側）を決定
+                Transform nextConnector = corridorConnectors.First(c => c != attachConnector);
+
+                // 反対側にEndRoomを接続
+                bool endPlaced = TryConnectNewItemToSpecificConnector_AllNewConnectors(endRoomPrefab, nextConnector);
+                if (endPlaced)
+                {
+                    // 使用済みコネクターを記録（既存側とCorridor接続側）
+                    usedConnectorPositions.Add(RoundVector3(existingConnector.position));
+                    usedConnectorPositions.Add(RoundVector3(attachConnector.position));
+
+                    // コネクターリスト更新：既存側を削除、Corridorの未使用コネクターを追加（残っていれば）
+                    availableConnectors.Remove(existingConnector);
+                    foreach (var c in corridorConnectors)
+                    {
+                        if (c != attachConnector && c != nextConnector)
+                        {
+                            availableConnectors.Add(c);
+                        }
+                    }
+
+                    // NavMeshAgentを有効化
+                    foreach (var a in corridorAgents) a.enabled = true;
+
+                    // NavMesh再構築
+                    if (navMeshSurface != null) navMeshSurface.BuildNavMesh();
+
+                    placed = true;
+                }
+                else
+                {
+                    // ロールバック
+                    spawnedRooms.Remove(corridor);
+                    spawnedRoomBounds.Remove(corridorBounds);
+                }
+
+                if (placed) break;
+            }
+
+            if (placed)
+            {
+                return true;
+            }
+            else
+            {
+                Destroy(corridor);
             }
         }
 
+        return false;
+    }
 
-        // NavMesh再構築（部屋追加直後）
-        /*if (navMeshSurface != null)
+    private bool TryConnectNewItem(GameObject itemPrefab, Transform specificConnector = null)
+    {
+        if (itemPrefab == null) return false;
+
+        // specificConnectorが指定されていればそのまま委譲
+        if (specificConnector != null)
         {
-            navMeshSurface.BuildNavMesh();
-        }*/
-        // NavMeshAgentを有効化
-        navAgents = newItem.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>(true);
-        foreach (var agent in navAgents)
-        {
-            agent.enabled = true;
+            return TryConnectNewItemToSpecificConnector_AllNewConnectors(itemPrefab, specificConnector);
         }
-        return true;
+
+        // 未指定ならavailableConnectorsからランダムに選んで委譲
+        if (availableConnectors == null || availableConnectors.Count == 0) return false;
+
+        int index = Random.Range(0, availableConnectors.Count);
+        Transform existingConnector = availableConnectors[index];
+        return TryConnectNewItemToSpecificConnector_AllNewConnectors(itemPrefab, existingConnector);
     }
 
     private Bounds CalculateBounds(GameObject room)
@@ -547,7 +711,7 @@ public class DungeonManager : MonoBehaviour
     private System.Collections.IEnumerator BuildNavMeshDelayed()
     {
         // 1フレーム待機して、すべてのオブジェクトが確実に配置されるのを待つ
-        yield return new WaitForSeconds(0.1f);
+        yield return null;
         navMeshSurface.BuildNavMesh();
         // NavMeshAgentを有効化
         foreach (var room in spawnedRooms)
@@ -564,5 +728,89 @@ public class DungeonManager : MonoBehaviour
         {
             player.transform.position = new Vector3(-0.22f, 1.05f, -9.79f);
         }
+    }
+
+    // 位置丸めの小ヘルパー
+    private Vector3 RoundVector3(Vector3 v)
+    {
+        return new Vector3(
+            Mathf.Round(v.x * 100f) / 100f,
+            Mathf.Round(v.y * 100f) / 100f,
+            Mathf.Round(v.z * 100f) / 100f
+        );
+    }
+
+    // 最終手段: 衝突判定を大幅に緩和してEndRoomを強制配置
+    private bool ForcePlace_Relaxed(GameObject itemPrefab, Transform existingConnector)
+    {
+        if (existingConnector == null || itemPrefab == null) return false;
+
+        GameObject newItem = Instantiate(itemPrefab);
+        var navAgents = newItem.GetComponentsInChildren<NavMeshAgent>(true);
+        foreach (var a in navAgents) a.enabled = false;
+
+        var newItemConnectors = GetAllConnectors(newItem);
+        if (newItemConnectors.Length == 0)
+        {
+            Debug.LogError($"プレハブ '{itemPrefab.name}' に Connector がありません。");
+            Destroy(newItem);
+            return false;
+        }
+
+        // シャッフル
+        for (int i = 0; i < newItemConnectors.Length; i++)
+        {
+            int r = Random.Range(i, newItemConnectors.Length);
+            (newItemConnectors[i], newItemConnectors[r]) = (newItemConnectors[r], newItemConnectors[i]);
+        }
+
+        foreach (var newItemConnector in newItemConnectors)
+        {
+            AlignObject(newItem, newItemConnector, existingConnector);
+
+            // 緩和された衝突チェック: Expand値を大きくして許容範囲を広げる
+            Bounds itemBounds = CalculateBounds(newItem);
+            itemBounds.Expand(-5.0f); // 通常-2.0f → -5.0fでさらに許容
+
+            bool collision = false;
+            foreach (var existingBounds in spawnedRoomBounds)
+            {
+                if (existingBounds.Intersects(itemBounds))
+                {
+                    collision = true;
+                    break;
+                }
+            }
+
+            if (collision)
+            {
+                continue; // まだ衝突する場合は次へ
+            }
+
+            // 配置成功
+            spawnedRooms.Add(newItem);
+            spawnedRoomBounds.Add(CalculateBounds(newItem));
+
+            usedConnectorPositions.Add(RoundVector3(existingConnector.position));
+            usedConnectorPositions.Add(RoundVector3(newItemConnector.position));
+
+            availableConnectors.Remove(existingConnector);
+            foreach (var c in newItemConnectors)
+            {
+                if (c != newItemConnector)
+                {
+                    availableConnectors.Add(c);
+                }
+            }
+
+            if (navMeshSurface != null) navMeshSurface.BuildNavMesh();
+            foreach (var a in navAgents) a.enabled = true;
+
+            return true;
+        }
+
+        // それでもダメなら諦めて破棄
+        Destroy(newItem);
+        return false;
     }
 }
