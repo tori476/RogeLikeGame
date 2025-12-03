@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem; // インプットシステムを使うために必要
 using UnityEngine.Animations;
 using System.Collections;
+using System.Collections.Generic;
 
 public class PlayerController : MonoBehaviour
 {
@@ -49,8 +50,8 @@ public class PlayerController : MonoBehaviour
     public bool hasBossOrcSummonAbility = false;
 
     //ボス選択の変数
-    private int currentBossIndex = 0; // 0:Scorpion, 1:RedDragon, 2:Orc
-    private int maxBossCount = 3;
+    private List<int> availableBossIDs = new List<int>();
+    private int currentListIndex = 0; // リスト内の現在位置
 
     private Transform lockOnTarget; // ロックオン対象
     private bool isLockingOn = false; // ロックオン状態
@@ -103,6 +104,7 @@ public class PlayerController : MonoBehaviour
                 weaponDamageDealer.Initialize(this.transform);
             }
         }
+        RefreshAvailableBossList();
         UpdateBossSelectionUI();
     }
 
@@ -213,22 +215,24 @@ public class PlayerController : MonoBehaviour
     {
         if (context.performed)
         {
+            // ★所持しているボスが1体以下なら切り替える必要なし
+            if (availableBossIDs.Count <= 1) return;
+
             float value = context.ReadValue<float>();
 
-            // 入力値が一定以上なら切り替え（スティックの誤入力防止）
             if (Mathf.Abs(value) > 0.5f)
             {
                 if (value > 0)
                 {
-                    currentBossIndex = (currentBossIndex + 1) % maxBossCount;
+                    currentListIndex = (currentListIndex + 1) % availableBossIDs.Count;
                 }
                 else
                 {
-                    currentBossIndex = (currentBossIndex - 1 + maxBossCount) % maxBossCount;
+                    currentListIndex = (currentListIndex - 1 + availableBossIDs.Count) % availableBossIDs.Count;
                 }
 
                 UpdateBossSelectionUI();
-                Debug.Log("Current Boss Index: " + currentBossIndex);
+                Debug.Log("Switched to Boss ID: " + GetCurrentBossID());
             }
         }
     }
@@ -242,25 +246,55 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    // 現在選択中のボスIDを取得するヘルパー関数
+    private int GetCurrentBossID()
+    {
+        if (availableBossIDs.Count == 0) return -1; // 何も持っていない
+        return availableBossIDs[currentListIndex];
+    }
+
     // 現在選択中のボスを召喚しようとする処理
     private void TrySummonCurrentBoss()
     {
-        switch (currentBossIndex)
+        int bossID = GetCurrentBossID();
+        if (bossID == -1) return;
+
+        switch (bossID)
         {
             case 0: // Fly Scorpion
                 if (hasBossFlyScorpionSummonAbility) SummonFlyScorpionBoss();
-                else Debug.Log("Scorpionのアビリティを持っていません");
                 break;
             case 1: // Red Dragon
                 if (hasBossRedDragonSummonAbility) SummonRedDragonBoss();
-                else Debug.Log("Red Dragonのアビリティを持っていません");
                 break;
             case 2: // Orc Dragon
-                if (hasBossOrcSummonAbility) SummonOrcBoss(); // ※SummonOrcBossメソッドの実装が必要です
-                else Debug.Log("Orcのアビリティを持っていません");
+                if (hasBossOrcSummonAbility) SummonOrcBoss();
                 break;
         }
-        UpdateBossSelectionUI(); // 消費後にUI（色など）を更新するため
+
+        // ★召喚して消費したのでリストを更新
+        RefreshAvailableBossList();
+        UpdateBossSelectionUI();
+    }
+
+    // ★所持状況に基づいてリストを作り直す関数
+    private void RefreshAvailableBossList()
+    {
+        availableBossIDs.Clear();
+
+        if (hasBossFlyScorpionSummonAbility) availableBossIDs.Add(0);
+        if (hasBossRedDragonSummonAbility) availableBossIDs.Add(1);
+        if (hasBossOrcSummonAbility) availableBossIDs.Add(2);
+
+        // リストのインデックスが範囲外にならないように補正
+        if (availableBossIDs.Count == 0)
+        {
+            currentListIndex = 0;
+        }
+        else if (currentListIndex >= availableBossIDs.Count)
+        {
+            currentListIndex = 0; // 選択位置をリセットまたは最後の要素に合わせる
+        }
     }
 
     // UI更新ヘルパー
@@ -268,15 +302,11 @@ public class PlayerController : MonoBehaviour
     {
         if (bossSelectorUI == null) return;
 
-        bool hasCurrentAbility = false;
-        switch (currentBossIndex)
-        {
-            case 0: hasCurrentAbility = hasBossFlyScorpionSummonAbility; break;
-            case 1: hasCurrentAbility = hasBossRedDragonSummonAbility; break;
-            case 2: hasCurrentAbility = hasBossOrcSummonAbility; break;
-        }
+        int currentBossID = GetCurrentBossID();
 
-        bossSelectorUI.UpdateBossUI(currentBossIndex, hasCurrentAbility);
+        // 何も持っていない(-1)か、持っているIDを渡す
+        // リストにある時点で所持している(hasAbility=true)ことが確定している
+        bossSelectorUI.UpdateBossUI(currentBossID, currentBossID != -1);
     }
 
     // アビリティ付与メソッドの更新（UI更新を追加）
@@ -284,18 +314,21 @@ public class PlayerController : MonoBehaviour
     {
         hasBossFlyScorpionSummonAbility = true;
         Debug.Log("Scorpion Ability Get!");
+        RefreshAvailableBossList(); // ★リスト更新
         UpdateBossSelectionUI();
     }
 
     public void GrantBossRedDragonSummonAbility()
     {
         hasBossRedDragonSummonAbility = true;
+        RefreshAvailableBossList(); // ★リスト更新
         UpdateBossSelectionUI();
     }
 
     public void GrantBossOrcSummonAbility()
     {
         hasBossOrcSummonAbility = true;
+        RefreshAvailableBossList(); // ★リスト更新
         UpdateBossSelectionUI();
     }
 
