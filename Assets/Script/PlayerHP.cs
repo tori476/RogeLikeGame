@@ -34,6 +34,8 @@ public class PlayerHP : MonoBehaviour
     private float slowMultiplier = 0.5f;        // スピード減少倍率（50%に）
     private Coroutine slowCoroutine;            // スローコルーチンの参照
 
+    private bool revivalItem = false;                   // 蘇生用アイテムを持っているか
+
     void Start()
     {
         currentHealth = maxHealth;
@@ -122,9 +124,20 @@ public class PlayerHP : MonoBehaviour
         // HP チェック
         if (currentHealth <= 0)
         {
-            Debug.Log("プレイヤーのHPが0になりました");
-            // ゲームオーバー処理
-            GameOverManager.Instance.TriggerGameOver();
+            if (revivalItem == true)
+            {
+                currentHealth += 1;
+                CreateHeartUI();
+                UpdateHealthUI();
+                revivalItem = false;
+            }
+            else
+            {
+                Debug.Log("プレイヤーのHPが0になりました");
+                // ゲームオーバー処理
+                GameOverManager.Instance.TriggerGameOver();
+            }
+
         }
     }
 
@@ -189,6 +202,11 @@ public class PlayerHP : MonoBehaviour
         currentHealth += 1;
         CreateHeartUI();
         UpdateHealthUI();
+    }
+
+    public void Revival()
+    {
+        revivalItem = true;
     }
 
     public void Heal(int healAmount)

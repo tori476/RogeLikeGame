@@ -53,4 +53,9 @@ public class WeaponDamageDealer : MonoBehaviour
             }
         }
     }
+
+    public void PowerUpItem()
+    {
+        damage *= 2;
+    }
 }
