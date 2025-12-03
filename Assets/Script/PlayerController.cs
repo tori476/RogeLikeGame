@@ -13,6 +13,8 @@ public class PlayerController : MonoBehaviour
 
     [Header("攻撃設定")]
     // この時間（秒）より短くボタンを押した場合、通常攻撃になる
+
+    public int damage = 25;
     public float tapAttackThreshold = 0.3f;
 
     public float attackCooldown = 0.5f;
@@ -157,6 +159,10 @@ public class PlayerController : MonoBehaviour
         {
             if (!isChargingAttack)
             {
+                if (weaponDamageDealer != null)
+                {
+                    weaponDamageDealer.SetDamage(damage);
+                }
                 // 【通常攻撃】
                 anim.SetTrigger("Attack");
                 StartCoroutine(LockMovementForDuration(normalAttackDuration));
@@ -181,6 +187,10 @@ public class PlayerController : MonoBehaviour
             // ■ 短いタップか、長いホールドかを判定
             if (holdDuration < tapAttackThreshold)
             {
+                if (weaponDamageDealer != null)
+                {
+                    weaponDamageDealer.SetDamage(damage);
+                }
                 // 【通常攻撃】
                 anim.SetTrigger("Attack");
                 StartCoroutine(LockMovementForDuration(normalAttackDuration));
@@ -195,7 +205,7 @@ public class PlayerController : MonoBehaviour
                 // 溜め時間の割合（0.0～1.0）を計算
                 float chargeRatio = chargeDuration / maxChargeDuration;
 
-                int chargeDamage = (int)(25 * (1.0f + chargeRatio)); // 1は基本ダメージ。WeaponDamageDealerの基本値と合わせる
+                int chargeDamage = (int)(damage * (1.0f + chargeRatio)); // 1は基本ダメージ。WeaponDamageDealerの基本値と合わせる
                 if (weaponDamageDealer != null)
                 {
                     weaponDamageDealer.SetDamage(chargeDamage);
@@ -427,6 +437,17 @@ public class PlayerController : MonoBehaviour
     public void ComboAttackItem()
     {
         anim.SetBool("ComboAttack", true);
+    }
+
+    public void SpeedUpItem()
+    {
+        moveSpeed += 7;
+        dashSpeed += 7;
+    }
+
+    public void PowerUpItem()
+    {
+        damage *= 2;
     }
 
     public void NoneItem()
