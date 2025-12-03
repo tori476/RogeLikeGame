@@ -204,7 +204,7 @@ public class DungeonManager : MonoBehaviour
             if (room != null)
             {
                 Debug.Log($"  部屋{i}: {room.name} at {room.transform.position}, Active: {room.activeSelf}, Layer: {LayerMask.LayerToName(room.layer)}");
-                
+
                 // レンダラーの状態確認
                 var renderers = room.GetComponentsInChildren<Renderer>();
                 int visibleCount = 0;
@@ -215,7 +215,7 @@ public class DungeonManager : MonoBehaviour
                 Debug.Log($"    Renderers: {visibleCount}/{renderers.Length} 有効");
             }
         }
-        
+
         // カメラの位置と向きを確認
         Camera mainCam = Camera.main;
         if (mainCam != null)
@@ -261,9 +261,9 @@ public class DungeonManager : MonoBehaviour
         Debug.Log($"<color=cyan>【EndRoom選択】floorIndex: {floorIndex}, 配列サイズ: {(endRoomPrefabsByFloor != null ? endRoomPrefabsByFloor.Length : 0)}</color>");
 
         // 階層に対応するプレハブが存在するかチェック
-        if (endRoomPrefabsByFloor != null && 
-            floorIndex >= 0 && 
-            floorIndex < endRoomPrefabsByFloor.Length && 
+        if (endRoomPrefabsByFloor != null &&
+            floorIndex >= 0 &&
+            floorIndex < endRoomPrefabsByFloor.Length &&
             endRoomPrefabsByFloor[floorIndex] != null)
         {
             Debug.Log($"<color=green>【EndRoom選択】{currentFloor}階用のEndRoomを使用: {endRoomPrefabsByFloor[floorIndex].name}</color>");
@@ -712,6 +712,9 @@ public class DungeonManager : MonoBehaviour
     {
         // 1フレーム待機して、すべてのオブジェクトが確実に配置されるのを待つ
         yield return null;
+        yield return null;
+        yield return null;
+
         navMeshSurface.BuildNavMesh();
         // NavMeshAgentを有効化
         foreach (var room in spawnedRooms)
