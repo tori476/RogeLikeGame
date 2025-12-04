@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem; // インプットシステムを使うために必要
 using UnityEngine.Animations;
 using System.Collections;
+using System.Collections.Generic;
 
 public class PlayerController : MonoBehaviour
 {
@@ -12,6 +13,8 @@ public class PlayerController : MonoBehaviour
 
     [Header("攻撃設定")]
     // この時間（秒）より短くボタンを押した場合、通常攻撃になる
+
+    public int damage = 25;
     public float tapAttackThreshold = 0.3f;
 
     public float attackCooldown = 0.5f;
@@ -31,14 +34,26 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private Collider weaponCollider;
 
-    [Header("ボス召喚アビリティ")]
+    [Header("ボス召喚設定")]
+
+    public BossSelectorUI bossSelectorUI;
     public GameObject summonedBossFlyScorpionPrefab; // 召喚するボスのプレハブ
 
     public GameObject summonedBossRedDragonPrefab;
+
+    public GameObject summonedBossOrcPrefab;
     public Transform summonPoint;         // ボスを召喚する位置
+
+    //アビリティの所持フラグ
     public bool hasBossFlyScorpionSummonAbility = false;
 
     public bool hasBossRedDragonSummonAbility = false;
+
+    public bool hasBossOrcSummonAbility = false;
+
+    //ボス選択の変数
+    private List<int> availableBossIDs = new List<int>();
+    private int currentListIndex = 0; // リスト内の現在位置
 
     private Transform lockOnTarget; // ロックオン対象
     private bool isLockingOn = false; // ロックオン状態
@@ -112,6 +127,8 @@ public class PlayerController : MonoBehaviour
                 weaponDamageDealer.Initialize(this.transform);
             }
         }
+        RefreshAvailableBossList();
+        UpdateBossSelectionUI();
     }
 
     void OnEnable()
@@ -163,6 +180,10 @@ public class PlayerController : MonoBehaviour
         {
             if (!isChargingAttack)
             {
+                if (weaponDamageDealer != null)
+                {
+                    weaponDamageDealer.SetDamage(damage);
+                }
                 // 【通常攻撃】
                 PlayAttackSound(); // 効果音再生
                 anim.SetTrigger("Attack");
@@ -188,6 +209,10 @@ public class PlayerController : MonoBehaviour
             // ■ 短いタップか、長いホールドかを判定
             if (holdDuration < tapAttackThreshold)
             {
+                if (weaponDamageDealer != null)
+                {
+                    weaponDamageDealer.SetDamage(damage);
+                }
                 // 【通常攻撃】
                 PlayAttackSound(); // 効果音再生
                 anim.SetTrigger("Attack");
@@ -203,7 +228,7 @@ public class PlayerController : MonoBehaviour
                 // 溜め時間の割合（0.0～1.0）を計算
                 float chargeRatio = chargeDuration / maxChargeDuration;
 
-                int chargeDamage = (int)(25 * (1.0f + chargeRatio)); // 1は基本ダメージ。WeaponDamageDealerの基本値と合わせる
+                int chargeDamage = (int)(damage * (1.0f + chargeRatio)); // 1は基本ダメージ。WeaponDamageDealerの基本値と合わせる
                 if (weaponDamageDealer != null)
                 {
                     weaponDamageDealer.SetDamage(chargeDamage);
@@ -220,22 +245,125 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    public void OnSpecialAbility_S(InputAction.CallbackContext context)
+    public void OnSwitchBoss(InputAction.CallbackContext context)
     {
-        // ボタンが押された瞬間、かつアビリティを所持している場合
-        if (context.started && hasBossFlyScorpionSummonAbility)
+        if (context.performed)
         {
-            SummonFlyScorpionBoss();
+            // ★所持しているボスが1体以下なら切り替える必要なし
+            if (availableBossIDs.Count <= 1) return;
+
+            float value = context.ReadValue<float>();
+
+            if (Mathf.Abs(value) > 0.5f)
+            {
+                if (value > 0)
+                {
+                    currentListIndex = (currentListIndex + 1) % availableBossIDs.Count;
+                }
+                else
+                {
+                    currentListIndex = (currentListIndex - 1 + availableBossIDs.Count) % availableBossIDs.Count;
+                }
+
+                UpdateBossSelectionUI();
+                Debug.Log("Switched to Boss ID: " + GetCurrentBossID());
+            }
         }
     }
 
-    public void OnSpecialAbility_D(InputAction.CallbackContext context)
+    // Input Actionsで "SummonBoss" を定義してください
+    public void OnSummonBoss(InputAction.CallbackContext context)
     {
-        // ボタンが押された瞬間、かつアビリティを所持している場合
-        if (context.started && hasBossRedDragonSummonAbility)
+        if (context.started)
         {
-            SummonRedDragonBoss();
+            TrySummonCurrentBoss();
         }
+    }
+
+    // 現在選択中のボスIDを取得するヘルパー関数
+    private int GetCurrentBossID()
+    {
+        if (availableBossIDs.Count == 0) return -1; // 何も持っていない
+        return availableBossIDs[currentListIndex];
+    }
+
+    // 現在選択中のボスを召喚しようとする処理
+    private void TrySummonCurrentBoss()
+    {
+        int bossID = GetCurrentBossID();
+        if (bossID == -1) return;
+
+        switch (bossID)
+        {
+            case 0: // Fly Scorpion
+                if (hasBossFlyScorpionSummonAbility) SummonFlyScorpionBoss();
+                break;
+            case 1: // Red Dragon
+                if (hasBossRedDragonSummonAbility) SummonRedDragonBoss();
+                break;
+            case 2: // Orc Dragon
+                if (hasBossOrcSummonAbility) SummonOrcBoss();
+                break;
+        }
+
+        // ★召喚して消費したのでリストを更新
+        RefreshAvailableBossList();
+        UpdateBossSelectionUI();
+    }
+
+    // ★所持状況に基づいてリストを作り直す関数
+    private void RefreshAvailableBossList()
+    {
+        availableBossIDs.Clear();
+
+        if (hasBossFlyScorpionSummonAbility) availableBossIDs.Add(0);
+        if (hasBossRedDragonSummonAbility) availableBossIDs.Add(1);
+        if (hasBossOrcSummonAbility) availableBossIDs.Add(2);
+
+        // リストのインデックスが範囲外にならないように補正
+        if (availableBossIDs.Count == 0)
+        {
+            currentListIndex = 0;
+        }
+        else if (currentListIndex >= availableBossIDs.Count)
+        {
+            currentListIndex = 0; // 選択位置をリセットまたは最後の要素に合わせる
+        }
+    }
+
+    // UI更新ヘルパー
+    private void UpdateBossSelectionUI()
+    {
+        if (bossSelectorUI == null) return;
+
+        int currentBossID = GetCurrentBossID();
+
+        // 何も持っていない(-1)か、持っているIDを渡す
+        // リストにある時点で所持している(hasAbility=true)ことが確定している
+        bossSelectorUI.UpdateBossUI(currentBossID, currentBossID != -1);
+    }
+
+    // アビリティ付与メソッドの更新（UI更新を追加）
+    public void GrantBossFlyScorpionSummonAbility()
+    {
+        hasBossFlyScorpionSummonAbility = true;
+        Debug.Log("Scorpion Ability Get!");
+        RefreshAvailableBossList(); // ★リスト更新
+        UpdateBossSelectionUI();
+    }
+
+    public void GrantBossRedDragonSummonAbility()
+    {
+        hasBossRedDragonSummonAbility = true;
+        RefreshAvailableBossList(); // ★リスト更新
+        UpdateBossSelectionUI();
+    }
+
+    public void GrantBossOrcSummonAbility()
+    {
+        hasBossOrcSummonAbility = true;
+        RefreshAvailableBossList(); // ★リスト更新
+        UpdateBossSelectionUI();
     }
 
     public void OnLockOn(InputAction.CallbackContext context)
@@ -317,19 +445,7 @@ public class PlayerController : MonoBehaviour
         isMovementLocked = false;
     }
 
-    // ボス召喚アビリティを付与するメソッド (BossSummonItemから呼ばれる)
-    public void GrantBossFlyScorpionSummonAbility()
-    {
-        hasBossFlyScorpionSummonAbility = true;
-        Debug.Log("ボス召喚アビリティを獲得！");
-        // ここでUIにアビリティが使えるようになったことを表示する処理などを追加できます
-    }
 
-    // ボスの召喚アビリティ
-    public void GrantBossRedDragonSummonAbility()
-    {
-        hasBossRedDragonSummonAbility = true;
-    }
 
     //チャージ攻撃を可能にする
     public void ChargeAttackItem()
@@ -345,6 +461,17 @@ public class PlayerController : MonoBehaviour
     public void ComboAttackItem()
     {
         anim.SetBool("ComboAttack", true);
+    }
+
+    public void SpeedUpItem()
+    {
+        moveSpeed += 7;
+        dashSpeed += 7;
+    }
+
+    public void PowerUpItem()
+    {
+        damage *= 2;
     }
 
     public void NoneItem()
@@ -375,46 +502,34 @@ public class PlayerController : MonoBehaviour
         Debug.Log("回転弾アイテムを使用しました！");
     }
 
+    // 召喚処理
     private void SummonFlyScorpionBoss()
     {
-        if (summonedBossFlyScorpionPrefab == null)
-        {
-            Debug.LogError("召喚するボスのプレハブが設定されていません！");
-            return;
-        }
-
-        // 召喚位置を決める（プレイヤーの前方など）
+        if (summonedBossFlyScorpionPrefab == null) { Debug.LogError("Prefab Missing"); return; }
         Vector3 spawnPosition = summonPoint != null ? summonPoint.position : transform.position + transform.forward * 3.0f;
-
-        // ボスを召喚
         GameObject boss = Instantiate(summonedBossFlyScorpionPrefab, spawnPosition, transform.rotation);
-        SummonedFlyScorpionBoss summonedBoss = boss.GetComponent<SummonedFlyScorpionBoss>();
-
-
-        // アビリティを消費
-        hasBossFlyScorpionSummonAbility = false;
-        Debug.Log("ボスを召喚し、アビリティを消費しました。");
+        // SummonedFlyScorpionBoss summonedBoss = boss.GetComponent<SummonedFlyScorpionBoss>(); 
+        hasBossFlyScorpionSummonAbility = false; // 消費
+        Debug.Log("Scorpion Summoned");
     }
 
     private void SummonRedDragonBoss()
     {
-        if (summonedBossRedDragonPrefab == null)
-        {
-            Debug.LogError("召喚するボスのプレハブが設定されていません！");
-            return;
-        }
-
-        // 召喚位置を決める（プレイヤーの前方など）
+        if (summonedBossRedDragonPrefab == null) { Debug.LogError("Prefab Missing"); return; }
         Vector3 spawnPosition = summonPoint != null ? summonPoint.position : transform.position + transform.forward * 3.0f;
-
-        // ボスを召喚
         GameObject boss = Instantiate(summonedBossRedDragonPrefab, spawnPosition, transform.rotation);
-        SummonedRedDragonBoss summonedBoss = boss.GetComponent<SummonedRedDragonBoss>();
+        hasBossRedDragonSummonAbility = false; // 消費
+        Debug.Log("Red Dragon Summoned");
+    }
 
-
-        // アビリティを消費
-        hasBossRedDragonSummonAbility = false;
-        Debug.Log("ボスを召喚し、アビリティを消費しました。");
+    // Orc用の召喚メソッドを追加（仮実装）
+    private void SummonOrcBoss()
+    {
+        if (summonedBossOrcPrefab == null) return;
+        Vector3 spawnPosition = summonPoint != null ? summonPoint.position : transform.position + transform.forward * 3.0f;
+        Instantiate(summonedBossOrcPrefab, spawnPosition, transform.rotation);
+        hasBossOrcSummonAbility = false;
+        Debug.Log("Orc Summoned");
     }
 
 
