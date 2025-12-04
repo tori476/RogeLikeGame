@@ -54,5 +54,11 @@ public class ProjectileMover : MonoBehaviour
             // Debug.Log($"敵 {other.name} に {damage} ダメージを与えました！"); // デバッグが不要ならコメントアウト
             Destroy(gameObject);
         }
+        if (other.CompareTag("Wall"))
+        {
+            Destroy(gameObject);
+        }
+
+
     }
 }
