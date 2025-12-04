@@ -2169,6 +2169,52 @@ MonoBehaviour:
   damageSound: {fileID: 8300000, guid: a0fc5718d7182453e910c51afa328b15, type: 3}
   enemyAIDamageSound: {fileID: 8300000, guid: ff0f3676f58bd4d54a9d8ea68eac1541, type: 3}
   damageSoundVolume: 0.8
+--- !u!1 &1203647974
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1203647976}
+  - component: {fileID: 1203647975}
+  m_Layer: 0
+  m_Name: BGM
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1203647975
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1203647974}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31d7a151160ed43c9b483cf519caffd4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameBGMPlayer
+  bgmNormal: {fileID: 8300000, guid: 44f67b2679408482f8d7fd47fd224c53, type: 3}
+  bgmBattle: {fileID: 8300000, guid: 8da5542cd90e6499abb43025d2e6a3cf, type: 3}
+--- !u!4 &1203647976
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1203647974}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 17.99643, y: 0, z: 32.90559}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1311242596
 GameObject:
   m_ObjectHideFlags: 0
@@ -3266,3 +3312,4 @@ SceneRoots:
   - {fileID: 109491036}
   - {fileID: 1463220153}
   - {fileID: 1337851540}
+  - {fileID: 1203647976}

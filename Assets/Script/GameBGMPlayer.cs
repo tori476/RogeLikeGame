@@ -1,0 +1,55 @@
+using UnityEngine;
+
+public class GameBGMPlayer : MonoBehaviour
+{
+    [Header("BGM設定")]
+    [Tooltip("ループ再生したい音声ファイルをここに設定してください")]
+    public AudioClip bgmNormal;
+
+    public AudioClip bgmBattle;
+
+
+
+
+    private AudioSource audioSource;
+
+    void Start()
+    {
+        // AudioSourceコンポーネントを追加
+        audioSource = gameObject.AddComponent<AudioSource>();
+
+        // ループ再生の設定
+        audioSource.loop = true;
+        audioSource.playOnAwake = false;
+
+
+        // 音声ファイルが設定されていれば再生開始
+        if (bgmNormal != null)
+        {
+            audioSource.clip = bgmNormal;
+            audioSource.Play();
+
+        }
+
+    }
+
+    // シーン切り替え時に停止したい場合は、このメソッドを他のスクリプトから呼び出してください
+    public void ChangeBGMBattle()
+    {
+        if (audioSource != null && audioSource.isPlaying)
+        {
+            audioSource.clip = bgmBattle;
+            audioSource.Play();
+        }
+    }
+
+    public void ChangeBGMNormal()
+    {
+        if (audioSource != null && audioSource.isPlaying)
+        {
+            audioSource.clip = bgmNormal;
+            audioSource.Play();
+        }
+    }
+
+}

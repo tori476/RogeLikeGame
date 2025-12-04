@@ -50,6 +50,12 @@ public class BossAI : EnemyAI
 
         Debug.Log($"{gameObject.name} (Boss) が起動しました！");
 
+        GameBGMPlayer bgmPlayer = FindFirstObjectByType<GameBGMPlayer>();
+        if (bgmPlayer != null)
+        {
+            bgmPlayer.ChangeBGMBattle();
+        }
+
         // UIのセットアップ
         uiController = FindFirstObjectByType<BossUIController>();
         if (uiController != null)
@@ -85,12 +91,17 @@ public class BossAI : EnemyAI
     {
         Debug.Log($"{gameObject.name} は倒された！");
 
+        GameBGMPlayer bgmPlayer = FindFirstObjectByType<GameBGMPlayer>();
+        if (bgmPlayer != null)
+        {
+            bgmPlayer.ChangeBGMNormal();
+        }
+
         // ドロップアイテム
         if (bossSummonItemPrefab != null)
         {
             Instantiate(bossSummonItemPrefab, transform.position + Vector3.up, Quaternion.identity);
         }
-
         // 階段生成
         SpawnStairs();
 
