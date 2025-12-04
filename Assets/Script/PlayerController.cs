@@ -685,4 +685,24 @@ public class PlayerController : MonoBehaviour
             footstepAudioSource.PlayOneShot(clip);
         }
     }
+
+    /// <summary>
+    /// プレイヤーの移動を外部から制御する（フェード中などに使用）
+    /// </summary>
+    public void SetMovementEnabled(bool enabled)
+    {
+        isMovementLocked = !enabled;
+        if (isMovementLocked)
+        {
+            // 移動が無効化された時は入力もリセット
+            moveInput = Vector2.zero;
+            anim.SetFloat("speed", 0);
+
+            // 足音を停止
+            if (footstepAudioSource != null && footstepAudioSource.isPlaying)
+            {
+                footstepAudioSource.Stop();
+            }
+        }
+    }
 }

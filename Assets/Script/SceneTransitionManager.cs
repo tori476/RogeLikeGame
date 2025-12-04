@@ -65,7 +65,20 @@ public class SceneTransitionManager : MonoBehaviour
     private IEnumerator TransitionCoroutine()
     {
         Debug.Log("=== TransitionCoroutine 開始 ===");
-        
+
+        // プレイヤーの移動を無効化
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        PlayerController playerController = null;
+        if (player != null)
+        {
+            playerController = player.GetComponent<PlayerController>();
+            if (playerController != null)
+            {
+                playerController.SetMovementEnabled(false);
+                Debug.Log("プレイヤーの移動を無効化しました");
+            }
+        }
+
         // フェードアウト（暗転）
         Debug.Log("フェードアウト開始");
         yield return StartCoroutine(FadeOut());
@@ -97,7 +110,6 @@ public class SceneTransitionManager : MonoBehaviour
         }
 
         // プレイヤーをスタート地点に移動
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
         {
             player.transform.position = new Vector3(0, 10, 0);
@@ -111,7 +123,14 @@ public class SceneTransitionManager : MonoBehaviour
         Debug.Log("フェードイン開始");
         yield return StartCoroutine(FadeIn());
         Debug.Log("フェードイン完了");
-        
+
+        // プレイヤーの移動を再度有効化
+        if (playerController != null)
+        {
+            playerController.SetMovementEnabled(true);
+            Debug.Log("プレイヤーの移動を有効化しました");
+        }
+
         Debug.Log("=== TransitionCoroutine 完了 ===");
     }
 
