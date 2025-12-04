@@ -2085,7 +2085,8 @@ MonoBehaviour:
   heartPrefab: {fileID: 2336036474711145968, guid: 01c12318df08a4b6ca6fdd57e6cc1d0c, type: 3}
   heartsContainer: {fileID: 63960679}
   heartUIRectTransform: {fileID: 63960679}
-  damageSound: {fileID: 8300000, guid: ff0f3676f58bd4d54a9d8ea68eac1541, type: 3}
+  damageSound: {fileID: 8300000, guid: a0fc5718d7182453e910c51afa328b15, type: 3}
+  enemyAIDamageSound: {fileID: 8300000, guid: ff0f3676f58bd4d54a9d8ea68eac1541, type: 3}
   damageSoundVolume: 0.8
 --- !u!1 &1311242596
 GameObject:
