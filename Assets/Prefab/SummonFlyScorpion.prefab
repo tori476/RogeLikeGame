@@ -484,6 +484,7 @@ MonoBehaviour:
   chargeImpactRadius: 3
   chargeIndicatorPrefab: {fileID: 0}
   despawnDelay: 1
+  footstepSound: {fileID: 8300000, guid: 5bf57f33044dd479ba63ef429c4f922b, type: 3}
 --- !u!195 &5678700014384096532
 NavMeshAgent:
   m_ObjectHideFlags: 0

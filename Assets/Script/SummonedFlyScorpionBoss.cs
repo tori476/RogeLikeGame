@@ -15,6 +15,9 @@ public class SummonedFlyScorpionBoss : MonoBehaviour
     public float chargeImpactRadius = 2.5f;     // 突進がヒットした際のダメージ範囲
     public GameObject chargeIndicatorPrefab;    // 突進先の地面に表示するインジケーターのプレハブ
     public float despawnDelay = 2.0f;           // 攻撃後に消滅するまでの時間
+    [Header("音声設定")]
+    public AudioClip footstepSound;             // 羽の音
+
 
     // --- プライベート変数 ---
     private NavMeshAgent agent;
@@ -23,6 +26,9 @@ public class SummonedFlyScorpionBoss : MonoBehaviour
     private GameObject chargeIndicatorInstance;
 
     private bool isAttacking = false;
+
+    private AudioSource footstepAudioSource;    // 足音専用のAudioSource
+    private bool isMoving = false;              // 移動中かどうかのフラグ
 
     void Awake()
     {
@@ -33,6 +39,11 @@ public class SummonedFlyScorpionBoss : MonoBehaviour
 
     void Start()
     {
+        // 足音専用のAudioSourceを追加
+        footstepAudioSource = gameObject.AddComponent<AudioSource>();
+        footstepAudioSource.loop = true; // ループ再生を有効に
+        footstepAudioSource.volume = 1.0f; // 音量を適切に設定
+        footstepAudioSource.clip = footstepSound; // 足音クリップを設定
         // 最も近い敵を探してターゲットに設定
         FindClosestEnemy();
         // 突進攻撃のコルーチンをここで一度だけ開始
@@ -42,6 +53,34 @@ public class SummonedFlyScorpionBoss : MonoBehaviour
     // PlayerControllerから呼び出されるメソッド
     void Update()
     {
+        // 移動中の足音再生制御
+        if (agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh)
+        {
+            float currentSpeed = agent.velocity.magnitude;
+
+            if (currentSpeed > 0.1f)
+            {
+                if (!isMoving)
+                {
+                    isMoving = true;
+                    if (footstepAudioSource != null && !footstepAudioSource.isPlaying)
+                    {
+                        footstepAudioSource.Play();
+                    }
+                }
+            }
+            else
+            {
+                if (isMoving)
+                {
+                    isMoving = false;
+                    if (footstepAudioSource != null && footstepAudioSource.isPlaying)
+                    {
+                        footstepAudioSource.Stop();
+                    }
+                }
+            }
+        }
         // 攻撃中でない場合のみ、コルーチンを開始する
         if (!isAttacking)
         {

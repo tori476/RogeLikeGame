@@ -25,6 +25,17 @@ public class BossAI_Orc : BossAI
     public GameObject chargeIndicatorPrefab;
     public float chargeImpactRadius = 2.0f;
 
+    [Header("サウンド設定")]
+    public AudioClip encounterSound; // beast-monster-cry-2
+    public AudioClip normalAttackSound; // 打撃6
+    public AudioClip smashSound1; // 発砲1
+    public AudioClip smashSound2; // ani_fa_mon10
+    public AudioClip deathSound; // se_monster_oak4
+    public AudioClip randomCrySound; // ani_fa_mon04
+    public AudioClip footstepSound; // ani_fa_mon01 (移動時の足音)
+    public float randomCryInterval = 5.0f; // ランダム鳴き声の間隔（秒）
+    public float randomCryChance = 0.3f; // ランダム鳴き声の発生確率
+
     // ステートマシン
     private enum OrcState { Chasing, Attacking, PreparingCharge, Charging, Cooldown }
     private OrcState currentState = OrcState.Chasing;
@@ -32,17 +43,60 @@ public class BossAI_Orc : BossAI
     private Animator anim;
     private Vector3 chargeTargetPos;
     private GameObject currentIndicator;
+    private bool hasPlayedEncounterSound = false;
+    private float nextRandomCryTime;
+    private AudioSource secondaryAudioSource; // 重要な音用の追加AudioSource
+    private AudioSource footstepAudioSource; // 足音専用のAudioSource
+    private bool isMoving = false; // 移動中かどうかのフラグ
 
     protected override void Start()
     {
         base.Start();
         anim = GetComponent<Animator>();
         currentState = OrcState.Chasing;
+
+        // AudioSourceは親クラスで既に設定されている
+        audioSource.spatialBlend = 0f; // 2Dサウンド（0 = 2D, 1 = 3D）
+
+        // 重要な音用の追加AudioSourceを作成
+        secondaryAudioSource = gameObject.AddComponent<AudioSource>();
+        secondaryAudioSource.spatialBlend = 0f;
+        secondaryAudioSource.playOnAwake = false;
+
+        // 足音専用のAudioSourceを作成
+        footstepAudioSource = gameObject.AddComponent<AudioSource>();
+        footstepAudioSource.spatialBlend = 0f;
+        footstepAudioSource.playOnAwake = false;
+
+        // 次のランダム鳴き声の時間を設定
+        nextRandomCryTime = Time.time + randomCryInterval;
+    }
+
+    /// <summary>
+    /// ボスが起動された瞬間（プレイヤーと出会った瞬間）に呼ばれる
+    /// </summary>
+    public override void ActivateEnemy()
+    {
+        base.ActivateEnemy();
+
+        // 出会った瞬間の咆哮音を再生
+        if (!hasPlayedEncounterSound)
+        {
+            PlaySound(encounterSound);
+            hasPlayedEncounterSound = true;
+        }
     }
 
     protected override void HandleBehavior()
     {
         UpdateMoveAnimation();
+
+        // ちょくちょくランダムな鳴き声を再生
+        if (Time.time >= nextRandomCryTime && Random.value < randomCryChance)
+        {
+            PlaySound(randomCrySound);
+            nextRandomCryTime = Time.time + randomCryInterval;
+        }
 
         // 突進中以外はプレイヤーの方を向く
         if (currentState == OrcState.Chasing)
@@ -70,6 +124,30 @@ public class BossAI_Orc : BossAI
             currentSpeed = agent.velocity.magnitude;
         }
         anim.SetFloat("Speed", currentSpeed, 0.1f, Time.deltaTime);
+
+        // 足音の再生
+        if (currentSpeed > 0.1f && !isMoving)
+        {
+            isMoving = true;
+            StartCoroutine(PlayFootstepSound());
+        }
+        else if (currentSpeed <= 0.1f && isMoving)
+        {
+            isMoving = false;
+            footstepAudioSource.Stop();
+        }
+    }
+
+    private IEnumerator PlayFootstepSound()
+    {
+        while (isMoving)
+        {
+            if (footstepSound != null)
+            {
+                footstepAudioSource.PlayOneShot(footstepSound);
+            }
+            yield return new WaitForSeconds(0.5f); // 足音の間隔を調整
+        }
     }
 
     private void LookAtPlayer()
@@ -170,11 +248,19 @@ public class BossAI_Orc : BossAI
     {
         currentState = OrcState.Attacking;
         agent.isStopped = true;
+
+        // ani_fa_mon10をアニメーション開始と同時に再生（2秒後に終わる）
+        if (smashSound2 != null)
+        {
+            Debug.Log("ani_fa_mon10: アニメーション開始時に再生開始");
+            PlayImportantSound(smashSound2);
+        }
+
         anim.SetTrigger("SmashAttack"); // 範囲攻撃用アニメーションTrigger
 
         // アニメーションイベント ExecuteSmashAttack() が呼ばれるのを待つ
-        // 硬直時間は長めに設定
-        yield return new WaitForSeconds(1.5f);
+        // 硬直時間は長めに設定（ani_fa_mon10の再生時間2秒を考慮）
+        yield return new WaitForSeconds(2.0f);
 
         StartCoroutine(Routine_Cooldown(smashCooldown));
     }
@@ -221,6 +307,9 @@ public class BossAI_Orc : BossAI
     /// </summary>
     public void DealDamageToPlayer()
     {
+        // 通常攻撃音を再生
+        PlaySound(normalAttackSound);
+
         if (player == null) return;
 
         Vector3 dirToPlayer = player.position - transform.position;
@@ -243,6 +332,17 @@ public class BossAI_Orc : BossAI
     /// </summary>
     public void ExecuteSmashAttack()
     {
+        // ani_fa_mon10を即座に再生開始（2秒の音声が叩きつけ終了時に終わるように）
+        if (smashSound2 != null)
+        {
+            Debug.Log("ani_fa_mon10: 即座に再生開始（2秒後に叩きつけ終了）");
+            PlayImportantSound(smashSound2);
+        }
+
+        // 発砲1を即座に再生（叩きつけの衝撃音）
+        PlaySound(smashSound1);
+        Debug.Log("ExecuteSmashAttack: 発砲1を再生");
+
         // エフェクト生成
         if (smashEffectPrefab != null)
         {
@@ -260,6 +360,69 @@ public class BossAI_Orc : BossAI
                 // 必要ならここでノックバック処理を追加
                 Debug.Log("オークのスマッシュ攻撃ヒット！");
             }
+        }
+    }
+
+    /// <summary>
+    /// 指定した秒数後にサウンドを再生するコルーチン
+    /// </summary>
+    private IEnumerator PlayDelayedSound(AudioClip clip, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        Debug.Log($"PlayDelayedSound: {clip.name} を再生");
+        PlaySound(clip); // 通常のAudioSourceで再生
+    }
+
+    /// <summary>
+    /// 指定した秒数後に重要なサウンドを再生するコルーチン
+    /// </summary>
+    private IEnumerator PlayDelayedImportantSound(AudioClip clip, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        Debug.Log($"PlayDelayedImportantSound: {clip.name} を再生");
+        PlayImportantSound(clip); // 専用AudioSourceで再生
+    }
+
+    /// <summary>
+    /// ボスが死亡した時に呼ばれる
+    /// </summary>
+    protected override void Die()
+    {
+        // 死亡音を再生
+        PlaySound(deathSound);
+
+        base.Die();
+    }
+
+    /// <summary>
+    /// サウンドを再生するヘルパーメソッド
+    /// </summary>
+    private void PlaySound(AudioClip clip)
+    {
+        if (clip != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(clip);
+        }
+    }
+
+    /// <summary>
+    /// 重要なサウンドを再生するヘルパーメソッド（他の音と重ならないように専用AudioSourceで再生）
+    /// </summary>
+    private void PlayImportantSound(AudioClip clip)
+    {
+        if (clip != null && secondaryAudioSource != null)
+        {
+            Debug.Log($"PlayImportantSound: {clip.name} を再生開始");
+            // 現在再生中の音を停止してから新しい音を再生
+            if (secondaryAudioSource.isPlaying)
+            {
+                secondaryAudioSource.Stop();
+            }
+            secondaryAudioSource.PlayOneShot(clip);
+        }
+        else
+        {
+            Debug.LogWarning($"PlayImportantSound: clip={clip}, secondaryAudioSource={secondaryAudioSource}");
         }
     }
 

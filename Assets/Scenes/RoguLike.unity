@@ -2092,7 +2092,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   moveSpeed: 10
   dashSpeed: 15
-  gravity: -9.81
+  gravity: -11.7
   damage: 25
   tapAttackThreshold: 0.3
   attackCooldown: 0.6
@@ -2111,8 +2111,12 @@ MonoBehaviour:
   hasBossRedDragonSummonAbility: 0
   hasBossOrcSummonAbility: 0
   orbitProjectilePrefab: {fileID: 7118824838423685637, guid: ac467996947cf4d2499edd457d832711, type: 3}
-  swordShotPrefab: {fileID: 9003413378606824040, guid: c36f4375b4be047fea15b396eb6fffbe, type: 3}
-  swordShotSpawnPoint: {fileID: 1657836884}
+  swordShotPrefab: {fileID: 0}
+  swordShotSpawnPoint: {fileID: 0}
+  se_sword09: {fileID: 8300000, guid: 7d1ad8699764b4875a648fd934bc4ca0, type: 3}
+  walk_on_floor1: {fileID: 8300000, guid: 39feed2b452d046d190beb1c04b087ea, type: 3}
+  run1: {fileID: 8300000, guid: dca87d01cce0947c1a5853d1721a763e, type: 3}
+  footstepInterval: 0.5
 --- !u!4 &1125697726 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1438546959266459337, guid: 60770bdb4dc667c45bea53db0339dc05, type: 3}
@@ -2163,6 +2167,9 @@ MonoBehaviour:
   heartPrefab: {fileID: 2336036474711145968, guid: 01c12318df08a4b6ca6fdd57e6cc1d0c, type: 3}
   heartsContainer: {fileID: 63960679}
   heartUIRectTransform: {fileID: 63960679}
+  damageSound: {fileID: 8300000, guid: ff0f3676f58bd4d54a9d8ea68eac1541, type: 3}
+  enemyAIDamageSound: {fileID: 0}
+  damageSoundVolume: 0.8
 --- !u!1 &1311242596
 GameObject:
   m_ObjectHideFlags: 0
@@ -2904,7 +2911,7 @@ MonoBehaviour:
   startRoomPrefab: {fileID: 4479279867502507703, guid: 8c35d2860f5e84027a13566c35b56a74, type: 3}
   endRoomPrefabsByFloor:
   - {fileID: 5066933235728734100, guid: adbb32665910a41a7887d9fbd5f04fb2, type: 3}
-  - {fileID: 5066933235728734100, guid: 324513bf1cb309640a27c2503d1c0674, type: 3}
+  - {fileID: 5677829625935088103, guid: 324513bf1cb309640a27c2503d1c0674, type: 3}
   - {fileID: 5066933235728734100, guid: f68b673ccc0fafc40aa88b3b57ce8aa6, type: 3}
   defaultEndRoomPrefab: {fileID: 0}
   treasureRoomPrefab: {fileID: 3922710928792911927, guid: 13ed862a0b6f04a4680ba87d15fbb92b, type: 3}

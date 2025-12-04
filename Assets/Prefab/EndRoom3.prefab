@@ -4118,6 +4118,8 @@ MonoBehaviour:
   attackRange: 6
   attackCooldown: 1.5
   attackDamage: 1
+  attackSound: {fileID: 0}
+  attackSoundVolume: 0.8
   heartPrefab: {fileID: 0}
   heartDropChance: 0.1
   knockbackForce: 10
@@ -4139,6 +4141,15 @@ MonoBehaviour:
   chargeProbability: 0.0000001
   chargeIndicatorPrefab: {fileID: 0}
   chargeImpactRadius: 2.5
+  encounterSound: {fileID: 8300000, guid: 14da71eb97dcd4ac898cb8514cdabb21, type: 3}
+  normalAttackSound: {fileID: 8300000, guid: 45f31f21aecb445de825796b754afdf2, type: 3}
+  smashSound1: {fileID: 8300000, guid: 8911ac0e76cd64b3b8a8f93e95a23b2a, type: 3}
+  smashSound2: {fileID: 8300000, guid: bce126f9f0f1b46debe2a7e915958a60, type: 3}
+  deathSound: {fileID: 8300000, guid: 131220f1ea2fd41b184bacf9e08ff557, type: 3}
+  randomCrySound: {fileID: 8300000, guid: 596d59d31eefe4deb9c1df19e2327c47, type: 3}
+  footstepSound: {fileID: 8300000, guid: 5a6eb888149b14014a290370c92e2bac, type: 3}
+  randomCryInterval: 5
+  randomCryChance: 0.3
 --- !u!4 &6701666474119245384 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5607107961512427574, guid: 7697844926639a740a8f8f1d2cc5d11d, type: 3}

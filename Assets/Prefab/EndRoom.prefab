@@ -3757,13 +3757,22 @@ PrefabInstance:
     m_TransformParent: {fileID: 3759829966664696325}
     m_Modifications:
     - target: {fileID: 2114886233046424092, guid: 589bb3a65e08446209aa4b06d78dd1fd, type: 3}
-      propertyPath: health
-      value: 300
-      objectReference: {fileID: 0}
+
+      propertyPath: arrowShootClip
+      value: 
+      objectReference: {fileID: 8300000, guid: fe8ac74a226724b0bb63abb6248cc7d0, type: 3}
     - target: {fileID: 2114886233046424092, guid: 589bb3a65e08446209aa4b06d78dd1fd, type: 3}
       propertyPath: chargeCooldown
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: 2114886233046424092, guid: 589bb3a65e08446209aa4b06d78dd1fd, type: 3}
+      propertyPath: flyingSoundClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 5bf57f33044dd479ba63ef429c4f922b, type: 3}
+    - target: {fileID: 2114886233046424092, guid: 589bb3a65e08446209aa4b06d78dd1fd, type: 3}
+      propertyPath: katanaSwingClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 22f0a06ba47044340b81bc2b7c9c04b0, type: 3}
     - target: {fileID: 2114886233046424092, guid: 589bb3a65e08446209aa4b06d78dd1fd, type: 3}
       propertyPath: bossAttackDamage
       value: 1

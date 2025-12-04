@@ -28,6 +28,13 @@ public class PlayerHP : MonoBehaviour
     [Header("ハートUIのRectTransform")]
     public RectTransform heartUIRectTransform; // Inspectorで割り当て
 
+    [Header("ダメージ効果音設定")]
+    public AudioClip damageSound; // 胸ぐらをつかむ音（通常のダメージを受けた時の効果音）
+    public AudioClip enemyAIDamageSound; // EnemyAIからの攻撃を受けた時の効果音
+    [Range(0f, 1f)]
+    public float damageSoundVolume = 0.8f; // ダメージ音の音量
+    private AudioSource audioSource;
+
     [Header("デバフ設定")]
     private bool isSlowed = false;              // スロー状態かどうか
     private float slowDuration = 10f;           // スロー効果の持続時間
@@ -44,6 +51,13 @@ public class PlayerHP : MonoBehaviour
 
         // プレイヤーのすべてのRendererコンポーネントを取得
         playerRenderers = GetComponentsInChildren<Renderer>();
+
+        // AudioSourceコンポーネントを取得、なければ追加
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
     }
 
     void CreateHeartUI()
@@ -91,12 +105,19 @@ public class PlayerHP : MonoBehaviour
 
         if (Keyboard.current.jKey.wasPressedThisFrame)
         {
-            TakeDamage(1);
+            TakeDamage(1, false); // テスト用は音を鳴らさない
             Debug.Log("Jキーが押されました - ダメージ実行");
         }
     }
 
+    // 既存のTakeDamageメソッド（後方互換性のため）
     public void TakeDamage(int damage)
+    {
+        TakeDamage(damage, false);
+    }
+
+    // EnemyAIからの攻撃かどうかを識別できるオーバーロード
+    public void TakeDamage(int damage, bool isFromEnemyAI)
     {
         // 無敵時間中はダメージを受けない
         if (isInvincible)
@@ -111,6 +132,33 @@ public class PlayerHP : MonoBehaviour
         UpdateHealthUI();
 
         Debug.Log($"ダメージを受けました。現在のHP: {currentHealth}/{maxHealth}");
+
+        // ダメージを受けたときに音を再生
+        if (audioSource != null)
+        {
+            // EnemyAIからの攻撃の場合は2つの音を再生
+            if (isFromEnemyAI)
+            {
+                // 胸ぐらをつかむ音（通常のダメージ音）
+                if (damageSound != null)
+                {
+                    audioSource.PlayOneShot(damageSound, damageSoundVolume);
+                }
+                // EnemyAI専用の追加効果音
+                if (enemyAIDamageSound != null)
+                {
+                    audioSource.PlayOneShot(enemyAIDamageSound, damageSoundVolume);
+                }
+            }
+            else
+            {
+                // 通常のダメージの場合は胸ぐらをつかむ音のみ
+                if (damageSound != null)
+                {
+                    audioSource.PlayOneShot(damageSound, damageSoundVolume);
+                }
+            }
+        }
 
         // ダメージを受けたら必ず無敵時間を開始（死亡時も含む）
         StartInvincibility();
