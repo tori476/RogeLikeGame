@@ -68,7 +68,7 @@ public class FastEnemyAI : EnemyAI
         PlayerHP playerHP = player.GetComponent<PlayerHP>();
         if (playerHP != null)
         {
-            playerHP.TakeDamage(attackDamage);
+            playerHP.TakeDamage(attackDamage, true); // EnemyAIからの攻撃であることを示す
         }
     }
 }

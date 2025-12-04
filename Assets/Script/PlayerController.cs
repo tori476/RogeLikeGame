@@ -89,6 +89,16 @@ public class PlayerController : MonoBehaviour
 
     private float speedMultiplier = 1f;  // スピード倍率（デバフ用）
 
+    [Header("効果音設定")]
+    public AudioClip se_sword09; // 攻撃時の効果音
+    public AudioClip walk_on_floor1; // 歩行時の足音
+    public AudioClip run1; // 走行時の足音
+    public float footstepInterval = 0.5f; // 足音の間隔（秒）
+
+    private AudioSource audioSource;
+    private AudioSource footstepAudioSource; // 足音専用のAudioSource
+    private float nextFootstepTime = 0f; // 次に足音を再生する時刻
+
     void Awake()
     {
         inputActions = new InputSystem_Actions();
@@ -98,6 +108,17 @@ public class PlayerController : MonoBehaviour
     {
         controller = GetComponent<CharacterController>();
         anim = GetComponent<Animator>();
+
+        // AudioSourceコンポーネントを取得、なければ追加
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+
+        // 足音専用のAudioSourceを追加
+        footstepAudioSource = gameObject.AddComponent<AudioSource>();
+
         if (weaponCollider != null)
         {
             weaponDamageDealer = weaponCollider.GetComponent<WeaponDamageDealer>();
@@ -164,6 +185,7 @@ public class PlayerController : MonoBehaviour
                     weaponDamageDealer.SetDamage(damage);
                 }
                 // 【通常攻撃】
+                PlayAttackSound(); // 効果音再生
                 anim.SetTrigger("Attack");
                 StartCoroutine(LockMovementForDuration(normalAttackDuration));
                 return;
@@ -192,6 +214,7 @@ public class PlayerController : MonoBehaviour
                     weaponDamageDealer.SetDamage(damage);
                 }
                 // 【通常攻撃】
+                PlayAttackSound(); // 効果音再生
                 anim.SetTrigger("Attack");
                 StartCoroutine(LockMovementForDuration(normalAttackDuration));
             }
@@ -214,6 +237,7 @@ public class PlayerController : MonoBehaviour
                 // 割合に応じて、最小と最大の間で飛び出す力を決定
                 float force = Mathf.Lerp(minChargeForce, maxChargeForce, chargeRatio);
 
+                PlayAttackSound(); // 効果音再生
                 StartCoroutine(PerformChargeAttack(force));
                 anim.SetTrigger("ChargeAttack");
                 StartCoroutine(LockMovementForDuration(chargeAttackDuration));
@@ -571,6 +595,12 @@ public class PlayerController : MonoBehaviour
         {
             // ロック中はアニメーターの速度も0にする
             anim.SetFloat("speed", 0);
+
+            // 足音を停止
+            if (footstepAudioSource != null && footstepAudioSource.isPlaying)
+            {
+                footstepAudioSource.Stop();
+            }
             return;
         }
         float currentSpeed = isDashing ? dashSpeed : moveSpeed;
@@ -579,6 +609,21 @@ public class PlayerController : MonoBehaviour
         if (moveDirection.magnitude > 0.1f)
         {
             transform.rotation = Quaternion.LookRotation(moveDirection);
+
+            // 足音の再生
+            if (Time.time >= nextFootstepTime)
+            {
+                PlayFootstepSound(isDashing);
+                nextFootstepTime = Time.time + footstepInterval;
+            }
+        }
+        else
+        {
+            // 移動していない場合は足音を停止
+            if (footstepAudioSource != null && footstepAudioSource.isPlaying)
+            {
+                footstepAudioSource.Stop();
+            }
         }
 
         float animSpeed = moveDirection.magnitude;
@@ -616,5 +661,28 @@ public class PlayerController : MonoBehaviour
     public void ApplySpeedMultiplier(float multiplier)
     {
         speedMultiplier = multiplier;
+    }
+
+    /// <summary>
+    /// 攻撃時の効果音を再生
+    /// </summary>
+    private void PlayAttackSound()
+    {
+        if (audioSource != null && se_sword09 != null)
+        {
+            audioSource.PlayOneShot(se_sword09);
+        }
+    }
+
+    /// <summary>
+    /// 足音を再生
+    /// </summary>
+    private void PlayFootstepSound(bool isRunning)
+    {
+        if (footstepAudioSource != null)
+        {
+            AudioClip clip = isRunning ? run1 : walk_on_floor1;
+            footstepAudioSource.PlayOneShot(clip);
+        }
     }
 }

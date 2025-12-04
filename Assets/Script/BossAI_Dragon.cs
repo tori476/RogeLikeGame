@@ -27,6 +27,19 @@ public class BossAI_Dragon : BossAI
     public GameObject chargeIndicatorPrefab;
     public float chargeImpactRadius = 2.5f;
 
+    [Header("音声設定")]
+    public AudioClip encounterSound;    // se_dragon02 (対面時)
+    public AudioClip flameBreathSound;  // dragon-breathing-fire-364475 (炎攻撃)
+    public AudioClip normalAttackSound; // hito_ge_kamituku02 (通常攻撃)
+    public AudioClip deathSound;        // se_dragon09_death (死亡時)
+    public AudioClip footstepSound;     // 怪獣の足音 (移動時)
+
+    // 基底クラスのaudioSourceを使用するため、ここでは宣言しない
+    private AudioSource flameAudioSource; // 炎攻撃専用のAudioSource
+    private AudioSource footstepAudioSource; // 足音専用のAudioSource
+    private bool hasPlayedEncounterSound = false; // 対面音を一度だけ再生するフラグ
+    private bool isMoving = false; // 移動中かどうかのフラグ
+
     // ステートマシンはこのクラス専用にする
     private enum DragonState { Chasing, Attacking, PreparingCharge, Charging, Cooldown }
     private DragonState currentState = DragonState.Chasing;
@@ -40,6 +53,19 @@ public class BossAI_Dragon : BossAI
         base.Start(); // BossAI (と EnemyAI) のStartを呼ぶ
         anim = GetComponent<Animator>();
         currentState = DragonState.Chasing;
+
+        // 炎攻撃専用のAudioSourceを追加
+        flameAudioSource = gameObject.AddComponent<AudioSource>();
+        // flameAudioSource.spatialBlend = 1.0f; // 3Dサウンドに設定
+        flameAudioSource.maxDistance = 50000000000f;   // 聞こえる最大距離
+        flameAudioSource.loop = true;         // ループ再生を有効に
+        flameAudioSource.volume = 30000000000000.0f;       // 音量をさらに大きく設定
+
+        // 足音専用のAudioSourceを追加
+        footstepAudioSource = gameObject.AddComponent<AudioSource>();
+        footstepAudioSource.loop = true; // ループ再生を有効に
+        footstepAudioSource.volume = 1.0f; // 音量を適切に設定
+        footstepAudioSource.clip = footstepSound; // 足音クリップを設定
     }
 
     // BossAI で定義した HandleBehavior をここで上書きして、独自の行動を書く
@@ -82,6 +108,30 @@ public class BossAI_Dragon : BossAI
         // Animatorのパラメータ "Speed" に値をセット
         // 0.1f は減衰値（DampTime）で、急激な変化を滑らかにします
         anim.SetFloat("Speed", currentSpeed, 0.1f, Time.deltaTime);
+
+        // 足音の再生制御
+        if (currentSpeed > 0.1f)
+        {
+            if (!isMoving)
+            {
+                isMoving = true;
+                if (footstepAudioSource != null && !footstepAudioSource.isPlaying)
+                {
+                    footstepAudioSource.Play();
+                }
+            }
+        }
+        else
+        {
+            if (isMoving)
+            {
+                isMoving = false;
+                if (footstepAudioSource != null && footstepAudioSource.isPlaying)
+                {
+                    footstepAudioSource.Stop();
+                }
+            }
+        }
     }
 
     private void LookAtPlayer()
@@ -100,6 +150,13 @@ public class BossAI_Dragon : BossAI
         agent.SetDestination(player.position);
 
         float dist = Vector3.Distance(transform.position, player.position);
+
+        // 対面時の効果音（一度だけ再生）
+        if (!hasPlayedEncounterSound && dist <= attackRange * 2f)
+        {
+            PlaySound(encounterSound);
+            hasPlayedEncounterSound = true;
+        }
 
         // 突進の判定
         if (dist <= chargeRange)
@@ -167,6 +224,9 @@ public class BossAI_Dragon : BossAI
         agent.isStopped = true;
         anim.SetTrigger("Attack");
 
+        // 通常攻撃の効果音を再生
+        PlaySound(normalAttackSound);
+
         yield return null;
         // アニメーションイベントでダメージ判定を入れる想定(DealDamageToPlayerなど)
 
@@ -178,6 +238,13 @@ public class BossAI_Dragon : BossAI
         currentState = DragonState.Attacking;
         agent.isStopped = true;
         anim.SetTrigger("FlameAttack");
+
+        // 炎攻撃の効果音を再生
+        if (flameAudioSource != null && flameBreathSound != null)
+        {
+            flameAudioSource.clip = flameBreathSound;
+            flameAudioSource.Play();
+        }
 
         yield return null;
         // アニメーションイベントでダメージ判定を入れる想定(DealDamageToPlayerなど)
@@ -296,6 +363,12 @@ public class BossAI_Dragon : BossAI
             // 参照を切る
             currentFlameInstance = null;
         }
+
+        // 炎攻撃の効果音を停止
+        if (flameAudioSource != null)
+        {
+            flameAudioSource.Stop();
+        }
     }
 
     // オブジェクト破棄時の掃除
@@ -319,5 +392,37 @@ public class BossAI_Dragon : BossAI
         // 前方の線
         Gizmos.color = Color.red;
         Gizmos.DrawRay(transform.position, transform.forward * attackRange);
+    }
+
+    /// <summary>
+    /// 効果音を再生するヘルパーメソッド
+    /// </summary>
+    private void PlaySound(AudioClip clip)
+    {
+        if (audioSource != null && clip != null)
+        {
+            audioSource.PlayOneShot(clip);
+        }
+    }
+
+    /// <summary>
+    /// 死亡時に呼ばれるメソッド（BossAIまたはEnemyAIで死亡処理がある場合はそこから呼ぶ）
+    /// </summary>
+    public void PlayDeathSound()
+    {
+        PlaySound(deathSound);
+    }
+
+    // 親クラスでDieメソッドがあればオーバーライド
+    protected override void Die()
+    {
+        // 死亡音を再生してから親クラスのDie()を呼ぶ
+        if (audioSource != null && deathSound != null)
+        {
+            // AudioSource.PlayClipAtPointを使用すると、オブジェクトが破壊されても音が鳴り続ける
+            AudioSource.PlayClipAtPoint(deathSound, transform.position, 3.0f);
+        }
+
+        base.Die();
     }
 }

@@ -13,6 +13,15 @@ public class ProjectileEnemyAI : EnemyAI
     public float fireRate = 2.0f;            // 発射間隔（秒）
     public int projectileDamage = 0;        // 球のダメージ
 
+    [Header("効果音設定")]
+    public AudioClip fireSound;              // 発射時の効果音
+    public AudioClip hitSound;               // 命中時の効果音
+    [Range(0f, 1f)]
+    public float fireSoundVolume = 0.8f;     // 発射音の音量
+    [Range(0f, 1f)]
+    public float hitSoundVolume = 1.5f;      // 命中音の音量（より大きく）
+    // 基底クラスのprotected audioSourceを使用するため、ここでは宣言しない
+
     private float nextFireTime = 0f;         // 次に発射できる時間
     private bool playerInRange = false;      // Playerが範囲内にいるか
 
@@ -25,6 +34,18 @@ public class ProjectileEnemyAI : EnemyAI
         {
             firePoint = transform;
         }
+
+        // AudioSourceコンポーネントを取得、なければ追加
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+
+        // AudioSourceの設定を最適化（2D寄りに変更）
+        audioSource.playOnAwake = false;
+        audioSource.spatialBlend = 0.3f; // より2D寄りに（聞こえやすく）
+        audioSource.minDistance = 3f;
+        audioSource.maxDistance = 50f;
 
         // NavMeshAgentがない場合は警告を出す（意図的にない場合は問題なし）
         if (agent == null)
@@ -86,6 +107,12 @@ public class ProjectileEnemyAI : EnemyAI
 
     private void FireProjectile()
     {
+        // 発射音を再生
+        if (audioSource != null && fireSound != null)
+        {
+            audioSource.PlayOneShot(fireSound, fireSoundVolume);
+        }
+
         // 球を生成
         GameObject projectile = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
 
@@ -96,6 +123,9 @@ public class ProjectileEnemyAI : EnemyAI
             // Playerへの方向を計算
             Vector3 direction = (player.position - firePoint.position).normalized;
             projectileScript.Initialize(direction, projectileSpeed, projectileDamage, gameObject);
+
+            // 命中音を設定
+            projectileScript.SetHitSound(hitSound);
         }
         else
         {

@@ -18,11 +18,16 @@ public class SummonedRedDragonBoss : MonoBehaviour
     public GameObject flameEffectPrefab;        // 炎のパーティクルプレハブ（Enemy用ダメージ判定付きのもの）
     public Transform flameSpawnPoint;           // 口元のTransform
 
+    [Header("音声設定")]
+    public AudioClip footstepSound;             // 怪獣の足音 (移動時)
+
     // --- プライベート変数 ---
     private NavMeshAgent agent;
     private Animator anim;
     private Transform targetEnemy;
     private GameObject currentFlameInstance;
+    private AudioSource footstepAudioSource;    // 足音専用のAudioSource
+    private bool isMoving = false;              // 移動中かどうかのフラグ
 
     void Awake()
     {
@@ -32,9 +37,47 @@ public class SummonedRedDragonBoss : MonoBehaviour
 
     void Start()
     {
+        // 足音専用のAudioSourceを追加
+        footstepAudioSource = gameObject.AddComponent<AudioSource>();
+        footstepAudioSource.loop = true; // ループ再生を有効に
+        footstepAudioSource.volume = 1.0f; // 音量を適切に設定
+        footstepAudioSource.clip = footstepSound; // 足音クリップを設定
+
         // 召喚されたら即座に最も近い敵を探して行動を開始
         FindClosestEnemy();
         StartCoroutine(FlameAttackSequence());
+    }
+
+    void Update()
+    {
+        // 移動中の足音再生制御
+        if (agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh)
+        {
+            float currentSpeed = agent.velocity.magnitude;
+
+            if (currentSpeed > 0.1f)
+            {
+                if (!isMoving)
+                {
+                    isMoving = true;
+                    if (footstepAudioSource != null && !footstepAudioSource.isPlaying)
+                    {
+                        footstepAudioSource.Play();
+                    }
+                }
+            }
+            else
+            {
+                if (isMoving)
+                {
+                    isMoving = false;
+                    if (footstepAudioSource != null && footstepAudioSource.isPlaying)
+                    {
+                        footstepAudioSource.Stop();
+                    }
+                }
+            }
+        }
     }
 
     // 最も近い「敵(EnemyAI)」を探す（自分自身は除外）
