@@ -93,11 +93,11 @@ public class PlayerController : MonoBehaviour
     public AudioClip se_sword09; // 攻撃時の効果音
     public AudioClip walk_on_floor1; // 歩行時の足音
     public AudioClip run1; // 走行時の足音
-    public float footstepInterval = 0.5f; // 足音の間隔（秒）
 
     private AudioSource audioSource;
     private AudioSource footstepAudioSource; // 足音専用のAudioSource
-    private float nextFootstepTime = 0f; // 次に足音を再生する時刻
+    private bool isCurrentlyDashing = false; // 現在のダッシュ状態
+    private bool isPlayingAttackSound = false; // 攻撃音再生中フラグ
 
     void Awake()
     {
@@ -118,6 +118,8 @@ public class PlayerController : MonoBehaviour
 
         // 足音専用のAudioSourceを追加
         footstepAudioSource = gameObject.AddComponent<AudioSource>();
+        footstepAudioSource.loop = true; // ループ再生を有効化
+        footstepAudioSource.playOnAwake = false; // 自動再生を無効化
 
         if (weaponCollider != null)
         {
@@ -185,7 +187,7 @@ public class PlayerController : MonoBehaviour
                     weaponDamageDealer.SetDamage(damage);
                 }
                 // 【通常攻撃】
-                PlayAttackSound(); // 効果音再生
+                PlayAttackSound(); // 暫定: アニメーションイベント設定まで
                 anim.SetTrigger("Attack");
                 StartCoroutine(LockMovementForDuration(normalAttackDuration));
                 return;
@@ -214,7 +216,7 @@ public class PlayerController : MonoBehaviour
                     weaponDamageDealer.SetDamage(damage);
                 }
                 // 【通常攻撃】
-                PlayAttackSound(); // 効果音再生
+                PlayAttackSound(); // 暫定: アニメーションイベント設定まで
                 anim.SetTrigger("Attack");
                 StartCoroutine(LockMovementForDuration(normalAttackDuration));
             }
@@ -237,7 +239,7 @@ public class PlayerController : MonoBehaviour
                 // 割合に応じて、最小と最大の間で飛び出す力を決定
                 float force = Mathf.Lerp(minChargeForce, maxChargeForce, chargeRatio);
 
-                PlayAttackSound(); // 効果音再生
+                PlayAttackSound(); // 暫定: アニメーションイベント設定まで
                 StartCoroutine(PerformChargeAttack(force));
                 anim.SetTrigger("ChargeAttack");
                 StartCoroutine(LockMovementForDuration(chargeAttackDuration));
@@ -595,35 +597,36 @@ public class PlayerController : MonoBehaviour
         {
             // ロック中はアニメーターの速度も0にする
             anim.SetFloat("speed", 0);
-
-            // 足音を停止
-            if (footstepAudioSource != null && footstepAudioSource.isPlaying)
-            {
-                footstepAudioSource.Stop();
-            }
+            StopFootstepSound(); // 足音を停止
             return;
         }
         float currentSpeed = isDashing ? dashSpeed : moveSpeed;
         Vector3 moveDirection = new Vector3(moveInput.x, 0, moveInput.y);
 
-        if (moveDirection.magnitude > 0.1f)
+        bool isMoving = moveDirection.magnitude > 0.1f;
+        
+        if (isMoving)
         {
             transform.rotation = Quaternion.LookRotation(moveDirection);
-
-            // 足音の再生
-            if (Time.time >= nextFootstepTime)
+            
+            // 足音の再生・切り替え
+            if (!footstepAudioSource.isPlaying)
             {
-                PlayFootstepSound(isDashing);
-                nextFootstepTime = Time.time + footstepInterval;
+                // 再生開始
+                PlayFootstepSound();
             }
+            else if (isCurrentlyDashing != isDashing)
+            {
+                // ダッシュ状態が変わったら音を切り替え
+                PlayFootstepSound();
+            }
+            
+            isCurrentlyDashing = isDashing;
         }
         else
         {
-            // 移動していない場合は足音を停止
-            if (footstepAudioSource != null && footstepAudioSource.isPlaying)
-            {
-                footstepAudioSource.Stop();
-            }
+            // 移動停止時は足音を停止
+            StopFootstepSound();
         }
 
         float animSpeed = moveDirection.magnitude;
@@ -664,25 +667,63 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
-    /// 攻撃時の効果音を再生
+    /// 攻撃時の効果音を再生（アニメーションイベントから呼び出し）
     /// </summary>
-    private void PlayAttackSound()
+    public void PlayAttackSound()
     {
+        // 既に攻撃音が再生中の場合は何もしない
+        if (isPlayingAttackSound)
+        {
+            return;
+        }
+
         if (audioSource != null && se_sword09 != null)
         {
             audioSource.PlayOneShot(se_sword09);
+            isPlayingAttackSound = true;
+            // 音声の長さ分待ってフラグをリセット
+            StartCoroutine(ResetAttackSoundFlag(se_sword09.length));
         }
     }
 
     /// <summary>
-    /// 足音を再生
+    /// 攻撃音再生フラグをリセットするコルーチン
     /// </summary>
-    private void PlayFootstepSound(bool isRunning)
+    private IEnumerator ResetAttackSoundFlag(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        isPlayingAttackSound = false;
+    }
+
+    /// <summary>
+    /// 足音を再生（ループ再生）
+    /// 現在のダッシュ状態に応じて歩行音または走行音を再生
+    /// </summary>
+    public void PlayFootstepSound()
     {
         if (footstepAudioSource != null)
         {
-            AudioClip clip = isRunning ? run1 : walk_on_floor1;
-            footstepAudioSource.PlayOneShot(clip);
+            AudioClip clip = isDashing ? run1 : walk_on_floor1;
+            if (clip != null && footstepAudioSource.clip != clip)
+            {
+                footstepAudioSource.clip = clip;
+                footstepAudioSource.Play();
+            }
+            else if (!footstepAudioSource.isPlaying && clip != null)
+            {
+                footstepAudioSource.Play();
+            }
+        }
+    }
+
+    /// <summary>
+    /// 足音を停止
+    /// </summary>
+    private void StopFootstepSound()
+    {
+        if (footstepAudioSource != null && footstepAudioSource.isPlaying)
+        {
+            footstepAudioSource.Stop();
         }
     }
 
@@ -697,12 +738,7 @@ public class PlayerController : MonoBehaviour
             // 移動が無効化された時は入力もリセット
             moveInput = Vector2.zero;
             anim.SetFloat("speed", 0);
-
-            // 足音を停止
-            if (footstepAudioSource != null && footstepAudioSource.isPlaying)
-            {
-                footstepAudioSource.Stop();
-            }
+            StopFootstepSound();
         }
     }
 }
