@@ -113,6 +113,8 @@ MonoBehaviour:
   projectileSpeed: 15
   fireRate: 2
   projectileDamage: 10
+  fireSound: {fileID: 8300000, guid: c148a20ed594945a5add5aeb1dcb9531, type: 3}
+  hitSound: {fileID: 8300000, guid: 3eaac21f83e0e4578a1c38040078fafe, type: 3}
 --- !u!65 &8905896945695189017
 BoxCollider:
   m_ObjectHideFlags: 0

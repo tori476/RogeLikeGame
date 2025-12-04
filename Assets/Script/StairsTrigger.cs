@@ -47,7 +47,7 @@ public class StairsTrigger : MonoBehaviour
         }
 
         // ダンジョンマネージャーを取得してマップを再生成
-        DungeonManager dungeonManager = FindObjectOfType<DungeonManager>();
+        DungeonManager dungeonManager = FindFirstObjectByType<DungeonManager>();
         if (dungeonManager != null)
         {
             Debug.Log("DungeonManagerを発見。マップ再生成を開始します...");

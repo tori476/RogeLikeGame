@@ -21,6 +21,10 @@ public class Projectile : MonoBehaviour
     private bool hasHit = false;       // ヒット済みフラグ
     private bool isInitialized = false; // 初期化済みフラグ
 
+    // 効果音用の変数
+    private AudioClip hitSound;
+    private AudioSource audioSource;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -35,6 +39,18 @@ public class Projectile : MonoBehaviour
         SphereCollider col = GetComponent<SphereCollider>();
         col.isTrigger = true;
         col.radius = 0.5f; // 適切なサイズに調整
+
+        // AudioSourceを取得または追加
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+
+        // AudioSourceの設定を最適化（2D音響に変更）
+        audioSource.playOnAwake = false;
+        audioSource.spatialBlend = 0f; // 完全な2D音響（0=2D, 1=完全3D）
+        audioSource.volume = 1.0f; // 音量を最大に
     }
 
     /// <summary>
@@ -61,6 +77,14 @@ public class Projectile : MonoBehaviour
         Destroy(gameObject, lifetime);
 
         Debug.Log($"球を発射: 速度={speed}, 方向={direction}, ダメージ={damage}");
+    }
+
+    /// <summary>
+    /// 命中音を設定するメソッド
+    /// </summary>
+    public void SetHitSound(AudioClip sound)
+    {
+        hitSound = sound;
     }
 
     private void FixedUpdate()
@@ -95,6 +119,9 @@ public class Projectile : MonoBehaviour
         // Playerに当たった場合
         if (other.CompareTag("Player"))
         {
+            // 命中音を再生
+            PlayHitSound();
+
             PlayerHP playerHP = other.GetComponent<PlayerHP>();
             if (playerHP != null)
             {
@@ -118,6 +145,34 @@ public class Projectile : MonoBehaviour
         {
             Debug.Log("球が敵に当たりましたが無視します");
             return;
+        }
+    }
+
+    /// <summary>
+    /// 命中音を再生
+    /// </summary>
+    private void PlayHitSound()
+    {
+        if (hitSound != null)
+        {
+            // 音を再生する独立したGameObjectを作成
+            GameObject soundObject = new GameObject("HitSound");
+            soundObject.transform.position = transform.position;
+
+            AudioSource tempAudioSource = soundObject.AddComponent<AudioSource>();
+            tempAudioSource.clip = hitSound;
+            tempAudioSource.spatialBlend = 0f; // 2D音響
+            tempAudioSource.volume = 1.0f;
+            tempAudioSource.Play();
+
+            // 音の長さ分待ってから削除
+            Destroy(soundObject, hitSound.length);
+
+            Debug.Log("命中音を独立したオブジェクトで再生しました");
+        }
+        else
+        {
+            Debug.LogWarning("hitSoundが設定されていません");
         }
     }
 

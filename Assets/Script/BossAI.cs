@@ -12,7 +12,7 @@ public class BossAI : EnemyAI
     public GameObject stairsPrefab;         // 次の階への階段
 
     // UI連携用のイベント
-    public event Action<int> OnHealthChanged;
+    public new event Action<int> OnHealthChanged;
     public event Action<BossAI> OnBossDied;
 
     protected BossUIController uiController; // 子クラスで使うかもしれないのでprotected

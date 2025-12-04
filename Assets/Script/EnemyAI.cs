@@ -15,6 +15,12 @@ public class EnemyAI : MonoBehaviour
     public int attackDamage = 1;        // 敵の攻撃力を1に固定
     protected float lastAttackTime = 0f;  // 最後に攻撃した時間（protected に変更）
 
+    [Header("効果音設定")]
+    public AudioClip attackSound;       // 攻撃時の効果音
+    [Range(0f, 1f)]
+    public float attackSoundVolume = 0.8f; // 攻撃音の音量
+    protected AudioSource audioSource;
+
     [Header("ドロップアイテム設定")]
     public GameObject heartPrefab;      // ハートのプレハブをインスペクターから設定
     [Range(0.0f, 1.0f)]
@@ -40,6 +46,13 @@ public class EnemyAI : MonoBehaviour
         // 自分にアタッチされているNavMeshAgentを取得
         agent = GetComponent<NavMeshAgent>();
         rb = GetComponent<Rigidbody>();
+
+        // AudioSourceコンポーネントを取得、なければ追加
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
 
         // "Player" タグがついたオブジェクト（プレイヤー）を探して、そのTransformを取得
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
@@ -88,10 +101,16 @@ public class EnemyAI : MonoBehaviour
     {
         Debug.Log($"{gameObject.name} がプレイヤーを攻撃！攻撃力: {attackDamage}");
 
+        // 攻撃効果音を再生
+        if (audioSource != null && attackSound != null)
+        {
+            audioSource.PlayOneShot(attackSound, attackSoundVolume);
+        }
+
         PlayerHP playerHP = player.GetComponent<PlayerHP>();
         if (playerHP != null)
         {
-            playerHP.TakeDamage(attackDamage);
+            playerHP.TakeDamage(attackDamage, true); // EnemyAIからの攻撃であることを示す
             Debug.Log($"{gameObject.name} がプレイヤーに {attackDamage} のダメージを与えた！");
         }
     }

@@ -2943,6 +2943,7 @@ MonoBehaviour:
   despawnDelay: 1
   flameEffectPrefab: {fileID: 4189398331686211174, guid: 5847682fb92444552bc268aa81ca5710, type: 3}
   flameSpawnPoint: {fileID: 3762391320449892874}
+  footstepSound: {fileID: 8300000, guid: 0c9f6b720d3444d6fb9d17bcb64833ef, type: 3}
 --- !u!1 &7460916330407897982
 GameObject:
   m_ObjectHideFlags: 0
