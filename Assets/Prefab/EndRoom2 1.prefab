@@ -1043,7 +1043,7 @@ GameObject:
   - component: {fileID: 3187917953365022589}
   - component: {fileID: 2667413500821229642}
   m_Layer: 0
-  m_Name: EndRoom2
+  m_Name: EndRoom2 1
   m_TagString: EndRoom
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6511,8 +6511,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 4.634281, y: 2.6768117, z: 4.942196}
-  m_Center: {x: 0.009010315, y: 1.3355362, z: 0.37426186}
+  m_Size: {x: 3.7099972, y: 2.6768117, z: 9.152149}
+  m_Center: {x: 0.004073143, y: 1.3355362, z: 0.50330544}
 --- !u!65 &6982937200492162926
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -6530,7 +6530,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Size: {x: 1, y: 1.1601233, z: 14.582947}
   m_Center: {x: 0, y: 1.881737, z: -0.80711746}
@@ -6550,6 +6550,8 @@ MonoBehaviour:
   attackRange: 9
   attackCooldown: 1.5
   attackDamage: 1
+  attackSound: {fileID: 0}
+  attackSoundVolume: 0.8
   heartPrefab: {fileID: 0}
   heartDropChance: 0.1
   knockbackForce: 10
@@ -6570,6 +6572,11 @@ MonoBehaviour:
   chargeProbability: 0.00001
   chargeIndicatorPrefab: {fileID: 0}
   chargeImpactRadius: 2.5
+  encounterSound: {fileID: 0}
+  flameBreathSound: {fileID: 0}
+  normalAttackSound: {fileID: 0}
+  deathSound: {fileID: 0}
+  footstepSound: {fileID: 0}
 --- !u!1 &3999154836570316243 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 100346, guid: eb58e8f2831a51f45a44a261e6710cdd, type: 3}
@@ -6592,7 +6599,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Size: {x: 90.26976, y: 123.28539, z: 238.10788}
   m_Center: {x: -2.977576, y: -8.148351, z: 79.09647}
