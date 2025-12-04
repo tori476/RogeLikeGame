@@ -390,6 +390,7 @@ public class BossAI_Orc : BossAI
     {
         // 死亡音を再生
         PlaySound(deathSound);
+        GameClearManager.Instance.TriggerGameClear();
 
         base.Die();
     }
@@ -429,6 +430,7 @@ public class BossAI_Orc : BossAI
     // オブジェクト破棄時の掃除
     private void OnDestroy()
     {
+
         if (currentIndicator != null) Destroy(currentIndicator);
     }
 

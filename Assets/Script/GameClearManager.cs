@@ -4,9 +4,9 @@ using UnityEngine.SceneManagement; // シーン遷移に必要
 using TMPro;
 using System.Collections;
 
-public class GameOverManager : MonoBehaviour
+public class GameClearManager : MonoBehaviour
 {
-    public static GameOverManager Instance { get; private set; }
+    public static GameClearManager Instance { get; private set; }
 
     [Header("UI設定")]
     public Image fadeImage;              // 暗転用の黒い画像
@@ -65,7 +65,7 @@ public class GameOverManager : MonoBehaviour
         rectTransform.sizeDelta = Vector2.zero;
     }
 
-    public void TriggerGameOver()
+    public void TriggerGameClear()
     {
         // 重複実行を防止
         if (hasTriggered)
@@ -95,7 +95,7 @@ public class GameOverManager : MonoBehaviour
         Time.timeScale = 1f;
 
         // Resultシーンへ遷移
-        SceneManager.LoadScene("TitleScene");
+        SceneManager.LoadScene("Result");
     }
 
     private IEnumerator FadeToBlack()

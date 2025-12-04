@@ -1278,6 +1278,63 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 9082412130131180784, guid: 5cdf1ac831646004288735c99ac51e4a, type: 3}
   m_PrefabInstance: {fileID: 1630580744}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &613338278
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 5319370966736654105, guid: 96946f236e9b9494188e5c36b85018e0, type: 3}
+      propertyPath: m_Name
+      value: SwordShotItem
+      objectReference: {fileID: 0}
+    - target: {fileID: 7217599184964899723, guid: 96946f236e9b9494188e5c36b85018e0, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.5445483
+      objectReference: {fileID: 0}
+    - target: {fileID: 7217599184964899723, guid: 96946f236e9b9494188e5c36b85018e0, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 4.37
+      objectReference: {fileID: 0}
+    - target: {fileID: 7217599184964899723, guid: 96946f236e9b9494188e5c36b85018e0, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -3.2932987
+      objectReference: {fileID: 0}
+    - target: {fileID: 7217599184964899723, guid: 96946f236e9b9494188e5c36b85018e0, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7217599184964899723, guid: 96946f236e9b9494188e5c36b85018e0, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7217599184964899723, guid: 96946f236e9b9494188e5c36b85018e0, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7217599184964899723, guid: 96946f236e9b9494188e5c36b85018e0, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7217599184964899723, guid: 96946f236e9b9494188e5c36b85018e0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7217599184964899723, guid: 96946f236e9b9494188e5c36b85018e0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7217599184964899723, guid: 96946f236e9b9494188e5c36b85018e0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 96946f236e9b9494188e5c36b85018e0, type: 3}
 --- !u!1 &718385735
 GameObject:
   m_ObjectHideFlags: 0
@@ -2111,8 +2168,8 @@ MonoBehaviour:
   hasBossRedDragonSummonAbility: 0
   hasBossOrcSummonAbility: 0
   orbitProjectilePrefab: {fileID: 7118824838423685637, guid: ac467996947cf4d2499edd457d832711, type: 3}
-  swordShotPrefab: {fileID: 0}
-  swordShotSpawnPoint: {fileID: 0}
+  swordShotPrefab: {fileID: 9003413378606824040, guid: c36f4375b4be047fea15b396eb6fffbe, type: 3}
+  swordShotSpawnPoint: {fileID: 1657836884}
   se_sword09: {fileID: 8300000, guid: 7d1ad8699764b4875a648fd934bc4ca0, type: 3}
   walk_on_floor1: {fileID: 8300000, guid: 39feed2b452d046d190beb1c04b087ea, type: 3}
   run1: {fileID: 8300000, guid: dca87d01cce0947c1a5853d1721a763e, type: 3}
@@ -2248,6 +2305,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1337851540}
   - component: {fileID: 1337851539}
+  - component: {fileID: 1337851541}
   m_Layer: 0
   m_Name: GameOverManager
   m_TagString: Untagged
@@ -2287,6 +2345,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1337851541
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1337851538}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5760505ebc8994d0083f667dfc61e555, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameClearManager
+  fadeImage: {fileID: 867974092}
+  gameOverText: {fileID: 0}
+  fadeDuration: 1.5
+  textAppearDelay: 1
+  resultSceneDelay: 2
 --- !u!1 &1463220151
 GameObject:
   m_ObjectHideFlags: 0
@@ -2910,9 +2985,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonGenerator
   startRoomPrefab: {fileID: 4479279867502507703, guid: 8c35d2860f5e84027a13566c35b56a74, type: 3}
   endRoomPrefabsByFloor:
+  - {fileID: 5066933235728734100, guid: f68b673ccc0fafc40aa88b3b57ce8aa6, type: 3}
   - {fileID: 5066933235728734100, guid: adbb32665910a41a7887d9fbd5f04fb2, type: 3}
   - {fileID: 5677829625935088103, guid: 324513bf1cb309640a27c2503d1c0674, type: 3}
-  - {fileID: 5066933235728734100, guid: f68b673ccc0fafc40aa88b3b57ce8aa6, type: 3}
   defaultEndRoomPrefab: {fileID: 0}
   treasureRoomPrefab: {fileID: 3922710928792911927, guid: 13ed862a0b6f04a4680ba87d15fbb92b, type: 3}
   normalRoomPrefabs:
@@ -3249,3 +3324,4 @@ SceneRoots:
   - {fileID: 109491036}
   - {fileID: 1463220153}
   - {fileID: 1337851540}
+  - {fileID: 613338278}
