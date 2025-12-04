@@ -137,7 +137,7 @@ public class EnemyAI : MonoBehaviour
         Debug.Log(gameObject.name + " の残り体力: " + health);
 
         // ノックバック処理（NavMeshAgentが存在し、かつ有効な場合のみ）
-        if (agent != null && knockbackCoroutine == null)
+        if (agent != null && knockbackCoroutine == null && attacker != null)
         {
             knockbackCoroutine = StartCoroutine(Knockback(attacker));
         }
@@ -161,7 +161,7 @@ public class EnemyAI : MonoBehaviour
         if (agent.isActiveAndEnabled)
         {
             agent.isStopped = true;
-            //agent.enabled = false;
+            agent.enabled = false;
         }
 
         // Rigidbodyを物理演算の対象にする
@@ -185,10 +185,10 @@ public class EnemyAI : MonoBehaviour
         // NavMeshAgentが存在し、かつ有効な場合のみ再開
         if (agent != null)// && agent.isOnNavMesh
         {
-            agent.isStopped = false;
-            agent.enabled = true;
-        }
 
+        }
+        agent.isStopped = false;
+        agent.enabled = true;
         knockbackCoroutine = null; // コルーチンが終了したことを示す
     }
 
