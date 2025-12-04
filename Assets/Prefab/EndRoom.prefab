@@ -3757,6 +3757,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 3759829966664696325}
     m_Modifications:
     - target: {fileID: 2114886233046424092, guid: 589bb3a65e08446209aa4b06d78dd1fd, type: 3}
+      propertyPath: health
+      value: 300
+      objectReference: {fileID: 0}
+    - target: {fileID: 2114886233046424092, guid: 589bb3a65e08446209aa4b06d78dd1fd, type: 3}
       propertyPath: chargeCooldown
       value: 3
       objectReference: {fileID: 0}

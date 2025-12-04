@@ -4114,7 +4114,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03acf0108bb8b4b5691b95190145f3b6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossAI_Orc
-  health: 200
+  health: 400
   attackRange: 6
   attackCooldown: 1.5
   attackDamage: 1

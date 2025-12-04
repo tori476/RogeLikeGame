@@ -3,6 +3,7 @@ using UnityEngine.AI;
 using Unity.AI.Navigation;
 using System.Collections.Generic;
 using System.Linq;
+using System.Collections;
 
 public class DungeonManager : MonoBehaviour
 {
@@ -43,7 +44,8 @@ public class DungeonManager : MonoBehaviour
     void Start()
     {
         navMeshSurface = GetComponent<NavMeshSurface>();
-        GenerateDungeon();
+        StartCoroutine(CO_RegenerateDungeon());
+        //GenerateDungeon();
         // NavMesh構築
         if (navMeshSurface != null)
         {
@@ -54,46 +56,55 @@ public class DungeonManager : MonoBehaviour
     // publicにしてSceneTransitionManagerから呼び出せるようにする
     public void RegenerateDungeon()
     {
+        // ★変更：実処理をコルーチンに委譲して開始する
+        StartCoroutine(CO_RegenerateDungeon());
+    }
+
+    // ★追加：コルーチン化した再生成処理
+    private IEnumerator CO_RegenerateDungeon()
+    {
         Debug.Log("=== RegenerateDungeon開始 ===");
 
-        // 既存の部屋・階段を全て削除
+        // --- 既存の部屋・階段削除 ---
         foreach (var room in spawnedRooms)
         {
-            if (room != null)
-            {
-                Destroy(room);
-            }
+            if (room != null) Destroy(room);
         }
         spawnedRooms.Clear();
         spawnedRoomBounds.Clear();
         availableConnectors.Clear();
         usedConnectorPositions.Clear();
 
-        // 階段も全て削除
         foreach (var stairs in GameObject.FindGameObjectsWithTag("Stairs"))
         {
             Destroy(stairs);
         }
 
-        Debug.Log("古いダンジョンを削除しました");
+        Debug.Log("古いダンジョンを削除指示完了。削除反映を1フレーム待ちます...");
+
+        // ★重要：Destroyが完全に反映されるまで1フレーム待つ
+        yield return null;
 
         // NavMeshSurface再取得
         navMeshSurface = GetComponent<NavMeshSurface>();
 
-        // 新しくダンジョン生成
+        // --- 新ダンジョン生成 ---
         Debug.Log("新しいダンジョンを生成します...");
         GenerateDungeon();
-        Debug.Log("ダンジョン生成完了");
+        Debug.Log("ダンジョン生成完了。物理演算/座標反映を1フレーム待ちます...");
 
-        // NavMesh再構築
+        // ★重要：Instantiate後の座標確定やCollider更新を待つため1フレーム待機
+        yield return null;
+
+        // --- NavMesh再構築 ---
         if (navMeshSurface != null)
         {
             Debug.Log("NavMesh再構築中...");
-            navMeshSurface.BuildNavMesh();
+            navMeshSurface.BuildNavMesh(); // ここで確定したジオメトリに対してベイク
             Debug.Log("NavMesh再構築完了");
         }
 
-        // NavMeshAgentを全ての部屋で有効化
+        // --- NavMeshAgent有効化 ---
         foreach (var room in spawnedRooms)
         {
             if (room != null)
@@ -101,27 +112,25 @@ public class DungeonManager : MonoBehaviour
                 var agents = room.GetComponentsInChildren<NavMeshAgent>(true);
                 foreach (var agent in agents)
                 {
-                    if (agent != null)
-                    {
-                        agent.enabled = true;
-                    }
+                    if (agent != null) agent.enabled = true;
                 }
             }
         }
 
-        // プレイヤーをspawnedRooms[0]（スタート部屋）のNavMesh上に移動
+        // --- プレイヤー移動 ---
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null && spawnedRooms.Count > 0)
         {
-            Vector3 startPos = new Vector3(0f, 10f, 0f);
-            Debug.Log($"プレイヤーを{startPos}に移動します");
+            // スタート部屋の位置へ移動（Y軸など微調整が必要な場合は調整してください）
+            Vector3 startPos = spawnedRooms[0].transform.position + new Vector3(0f, 1f, 0f);
 
-            // CharacterControllerの座標リセット対応
+            // CharacterController干渉対策
             var controller = player.GetComponent<CharacterController>();
             if (controller != null)
             {
                 controller.enabled = false;
                 player.transform.position = startPos;
+                yield return null; // ★念のためここでも1フレーム待つと安全
                 controller.enabled = true;
             }
             else
@@ -129,17 +138,9 @@ public class DungeonManager : MonoBehaviour
                 player.transform.position = startPos;
             }
 
+            // 速度リセットなど
             var pc = player.GetComponent<PlayerController>();
-            if (pc != null)
-            {
-                pc.ResetVelocity();
-            }
-
-            Debug.Log("プレイヤーの移動完了");
-        }
-        else
-        {
-            Debug.LogWarning("プレイヤーが見つからないか、部屋が生成されていません");
+            if (pc != null) pc.ResetVelocity();
         }
 
         Debug.Log("=== RegenerateDungeon完了 ===");
@@ -711,9 +712,12 @@ public class DungeonManager : MonoBehaviour
     private System.Collections.IEnumerator BuildNavMeshDelayed()
     {
         // 1フレーム待機して、すべてのオブジェクトが確実に配置されるのを待つ
+
         yield return null;
         yield return null;
         yield return null;
+
+
 
         navMeshSurface.BuildNavMesh();
         // NavMeshAgentを有効化

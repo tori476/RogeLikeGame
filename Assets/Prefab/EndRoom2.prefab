@@ -6546,7 +6546,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc05e149a268344e68ad3e72c90f2d66, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossAI_Dragon
-  health: 300
+  health: 350
   attackRange: 9
   attackCooldown: 1.5
   attackDamage: 1
