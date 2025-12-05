@@ -35,6 +35,12 @@ public abstract class ItemBase : MonoBehaviour
         // 接触したのがプレイヤーかどうかをタグで判定（共通処理）
         if (other.CompareTag("Player"))
         {
+            // アイテム取得時の効果音を再生
+            if (GameBGMPlayer.Instance != null)
+            {
+                GameBGMPlayer.Instance.PlayItemGetSound();
+            }
+
             // 継承先のクラスで個別の効果処理を実行
             ApplyEffect(other.gameObject);
 
