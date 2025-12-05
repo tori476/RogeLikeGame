@@ -73,6 +73,11 @@ public class GameBGMPlayer : MonoBehaviour
         }
     }
 
+    public void StopBGM()
+    {
+        audioSource.Stop();
+    }
+
     // アイテム取得時の効果音を再生
     public void PlayItemGetSound()
     {

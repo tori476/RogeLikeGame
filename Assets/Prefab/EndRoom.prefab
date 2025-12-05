@@ -3762,7 +3762,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2114886233046424092, guid: 589bb3a65e08446209aa4b06d78dd1fd, type: 3}
       propertyPath: health
-      value: 300
+      value: 350
       objectReference: {fileID: 0}
     - target: {fileID: 2114886233046424092, guid: 589bb3a65e08446209aa4b06d78dd1fd, type: 3}
       propertyPath: chargeCooldown

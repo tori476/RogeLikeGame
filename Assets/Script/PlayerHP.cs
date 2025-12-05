@@ -182,6 +182,11 @@ public class PlayerHP : MonoBehaviour
             else
             {
                 Debug.Log("プレイヤーのHPが0になりました");
+                GameBGMPlayer bgmPlayer = FindFirstObjectByType<GameBGMPlayer>();
+                if (bgmPlayer != null)
+                {
+                    bgmPlayer.StopBGM();
+                }
                 // ゲームオーバー処理
                 GameOverManager.Instance.TriggerGameOver();
             }
