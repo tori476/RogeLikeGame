@@ -230,17 +230,17 @@ public class PlayerController : MonoBehaviour
                 // 溜め時間の割合（0.0～1.0）を計算
                 float chargeRatio = chargeDuration / maxChargeDuration;
 
-                int chargeDamage = (int)(damage * (1.0f + chargeRatio)); // 1は基本ダメージ。WeaponDamageDealerの基本値と合わせる
+                int chargeDamage = (int)(damage * (2.0f + chargeRatio)); // 1は基本ダメージ。WeaponDamageDealerの基本値と合わせる
                 if (weaponDamageDealer != null)
                 {
                     weaponDamageDealer.SetDamage(chargeDamage);
                 }
 
                 // 割合に応じて、最小と最大の間で飛び出す力を決定
-                float force = Mathf.Lerp(minChargeForce, maxChargeForce, chargeRatio);
+                //float force = Mathf.Lerp(minChargeForce, maxChargeForce, chargeRatio);
 
                 PlayAttackSound(); // 暫定: アニメーションイベント設定まで
-                StartCoroutine(PerformChargeAttack(force));
+                //StartCoroutine(PerformChargeAttack(force));
                 anim.SetTrigger("ChargeAttack");
                 StartCoroutine(LockMovementForDuration(chargeAttackDuration));
             }
@@ -604,11 +604,11 @@ public class PlayerController : MonoBehaviour
         Vector3 moveDirection = new Vector3(moveInput.x, 0, moveInput.y);
 
         bool isMoving = moveDirection.magnitude > 0.1f;
-        
+
         if (isMoving)
         {
             transform.rotation = Quaternion.LookRotation(moveDirection);
-            
+
             // 足音の再生・切り替え
             if (!footstepAudioSource.isPlaying)
             {
@@ -620,7 +620,7 @@ public class PlayerController : MonoBehaviour
                 // ダッシュ状態が変わったら音を切り替え
                 PlayFootstepSound();
             }
-            
+
             isCurrentlyDashing = isDashing;
         }
         else
