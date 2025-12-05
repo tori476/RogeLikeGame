@@ -4138,7 +4138,7 @@ MonoBehaviour:
   chargeSpeed: 20
   chargeDamage: 40
   chargeCooldown: 5
-  chargeProbability: 0.0000001
+  chargeProbability: 0
   chargeIndicatorPrefab: {fileID: 0}
   chargeImpactRadius: 2.5
   encounterSound: {fileID: 8300000, guid: 14da71eb97dcd4ac898cb8514cdabb21, type: 3}
