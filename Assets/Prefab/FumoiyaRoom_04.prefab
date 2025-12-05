@@ -139,7 +139,7 @@ GameObject:
   - component: {fileID: 4207747582141058880}
   - component: {fileID: 6162753929154616182}
   m_Layer: 0
-  m_Name: Point Light(7)
+  m_Name: Point Light(6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -488,7 +488,7 @@ GameObject:
   - component: {fileID: 1003426206102642577}
   - component: {fileID: 2912241591806152575}
   m_Layer: 0
-  m_Name: Point Light(14)
+  m_Name: Point Light(8)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -788,7 +788,7 @@ GameObject:
   - component: {fileID: 5473789223644501112}
   - component: {fileID: 3852515036568691714}
   m_Layer: 0
-  m_Name: Point Light(10)
+  m_Name: Point Light(3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1137,7 +1137,7 @@ GameObject:
   - component: {fileID: 3008287927724518956}
   - component: {fileID: 1989225110833024353}
   m_Layer: 0
-  m_Name: Point Light(10)
+  m_Name: Point Light(7)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1554,7 +1554,7 @@ GameObject:
   - component: {fileID: 1490894019451430589}
   - component: {fileID: 7535829105929276545}
   m_Layer: 0
-  m_Name: Point Light(1)
+  m_Name: Point Light(5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1752,6 +1752,14 @@ MonoBehaviour:
   doorPrefab: {fileID: 1211182161564370512, guid: 749aba12397144121bf3c0ce307d3625, type: 3}
   roomLights:
   - {fileID: 207552173644199383}
+  - {fileID: 8904878362370835821}
+  - {fileID: 8582379959476715390}
+  - {fileID: 2611321328058178863}
+  - {fileID: 8874998595386005600}
+  - {fileID: 4798173085297412902}
+  - {fileID: 332510960701609507}
+  - {fileID: 3004030045593741250}
+  - {fileID: 1571485517678004317}
 --- !u!114 &1905084011629739287
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1815,7 +1823,7 @@ GameObject:
   - component: {fileID: 4907171773775585480}
   - component: {fileID: 6468461648012712145}
   m_Layer: 0
-  m_Name: Point Light(7)
+  m_Name: Point Light(2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2053,7 +2061,7 @@ GameObject:
   - component: {fileID: 7586887397576088949}
   - component: {fileID: 7137400506226807152}
   m_Layer: 0
-  m_Name: Point Light(14)
+  m_Name: Point Light(4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
