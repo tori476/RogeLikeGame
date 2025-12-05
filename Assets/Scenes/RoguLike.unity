@@ -2200,6 +2200,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameBGMPlayer
   bgmNormal: {fileID: 8300000, guid: 44f67b2679408482f8d7fd47fd224c53, type: 3}
   bgmBattle: {fileID: 8300000, guid: 8da5542cd90e6499abb43025d2e6a3cf, type: 3}
+  itemGetSound: {fileID: 8300000, guid: 869ba6fc47c33f64281ce5752a776331, type: 3}
 --- !u!4 &1203647976
 Transform:
   m_ObjectHideFlags: 0
