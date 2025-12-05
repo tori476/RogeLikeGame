@@ -2983,6 +2983,9 @@ MonoBehaviour:
   - {fileID: 3922710928792911927, guid: bf01c35d4f4b94ff1a6c6fa3660d7edf, type: 3}
   - {fileID: 6994072934246967475, guid: b3ea3b15490dc41449b71e98135a70e2, type: 3}
   - {fileID: 3760890723529728177, guid: 6ddb7619c7ceb4b28ab38a1c690bdb4b, type: 3}
+  - {fileID: 103996237100713169, guid: 85ff306241a1d48acafb45e208d6c054, type: 3}
+  - {fileID: 6994072934246967475, guid: 08d1583b616ad482d91b7de01adfd4d4, type: 3}
+  - {fileID: 103996237100713169, guid: 851cbe2f37ac9457eabe668cf4f9ead2, type: 3}
   corridorPrefabs: []
   wallPrefab: {fileID: 1211182161564370512, guid: 749aba12397144121bf3c0ce307d3625, type: 3}
   stairsPrefab: {fileID: 0}

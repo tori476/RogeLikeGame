@@ -7,7 +7,7 @@ public class WeaponDamageDealer : MonoBehaviour
     private int damage = 25; // この武器の基本ダメージ
 
     [SerializeField]
-    private float hitStopDuration = 0.2f; // ヒットストップの時間
+    private float hitStopDuration = 0.4f; // ヒットストップの時間
 
     // 1回の攻撃で同じ敵に複数回ダメージを与えないように、ヒットした敵を記録するリスト
     private List<Collider> hitEnemies = new List<Collider>();
